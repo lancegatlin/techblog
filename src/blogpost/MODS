@@ -1,0 +1,9 @@
+blogpost modifications 
+======================
+Lance Gatlin <lance.gatlin@gmail.com>
+26-May-2014
+
+blogpost.py was modified to fix the following:
+1. Disabled santize_html function. Perhaps this was necessary for some previous version of wordpress (currently 3.9) but is no longer needed. Removes new lines in <pre></pre> blocks.
+2. Added tidy_html function to format HTML using the std tidy command
+3. Modified default wordpress.conf to mostly use the asciidoc xhtml11

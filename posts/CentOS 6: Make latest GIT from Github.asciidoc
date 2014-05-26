@@ -1,0 +1,47 @@
+CentOS 6: Make latest GIT from Github
+=====================================
+Lance Gatlin <lance.gatlin@gmail.com>
+:blogpost-status: unpublished
+:blogpost-categories: git,centos6
+
+== Versions
+1. CentOS 6.5
+2. GIT 1.7.1 & 1.8.5.5
+
+== Prerequisites
+[source,bash,numbered]
+sudo yum install openssl-devel curl-devel expat-devel
+
+== Initial GIT Install
+[source,bash,numbered]
+sudo yum install git
+
+
+=== Clone git from github
+[source,bash,numbered]
+git clone https://github.com/git/git.git 
+
+=== Switch to version tag branch
+List available tags:
+[source,bash,numbered]
+cd git
+git tag
+
+=== Pick a version and build it:
+[source,bash,numbered]
+git checkout v1.8.5.5
+make
+
+== Configure
+[source,bash,numbered]
+git --version
+git version 1.7.1
+sudo mv /usr/bin/git /usr/bin/git_1710
+sudo mv ./git /usr/bin/git_1855
+sudo alternatives --install /usr/bin/git git /usr/bin/git/git_1710 1710
+sudo alternatives --install /usr/bin/git git /usr/bin/git/git_1710 1855
+
+== Test
+[source,bash,numbered]
+git --version
+git version v1.8.5.5
