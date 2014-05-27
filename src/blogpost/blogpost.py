@@ -26,6 +26,7 @@ import subprocess
 import wordpresslib # http://www.blackbirdblog.it/programmazione/progetti/28
 import asciidocapi
 
+import ntpath
 
 VERSION = '0.9.6'
 PROG = os.path.basename(os.path.splitext(__file__)[0])
@@ -110,6 +111,12 @@ def shell(cmd, stdin=None):
     if popen.returncode != 0:
         die('%s returned non-zero exit status %d' % (cmd, popen.returncode))
     return (stdoutdata, stderrdata, popen.returncode)
+
+def path_split(path):
+    head, tail = ntpath.split(path)
+    full_filename = tail or ntpath.basename(head)
+    filename,ext = os.path.splitext(full_filename)
+    return (head,filename,ext)
 
 
 ###########
@@ -215,7 +222,8 @@ class Blogpost(object):
             self.blog_file = blog_file
             if self.media_dir is None:
                 self.media_dir = os.path.abspath(os.path.dirname(blog_file))
-            self.cache_file = os.path.splitext(blog_file)[0] + '.blogpost'
+            abspath,filename,ext = path_split(blog_file)
+            self.cache_file = abspath + '/.blogpost/' + filename + '.blogpost'
 
     def set_title_from_blog_file(self):
         """
@@ -852,6 +860,8 @@ else:
             if not os.path.isdir(OPTIONS.media_dir):
                 die('missing media directory: %s' % OPTIONS.media_dir)
             blog.media_dir = OPTIONS.media_dir
+        if not os.path.isdir('.blogpost'):
+          os.makedirs('.blogpost')
         blog.set_blog_file(blog_file)
         blog.load_cache()
         blog.get_parameters()
