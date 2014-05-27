@@ -1,6 +1,7 @@
 CentOS 6: Make latest GIT from Github
 =====================================
 Lance Gatlin <lance.gatlin@gmail.com>
+v1,27-May-2014
 :blogpost-status: unpublished
 :blogpost-categories: git,centos6
 

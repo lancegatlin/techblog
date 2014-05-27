@@ -16,26 +16,26 @@ S'unpublished'
 p7
 sS'title'
 p8
-S'CentOS 6: Make latest GIT from Github'
+S'CentOS 6.5: Virtualbox Guest Additions'
 p9
 sS'url'
 p10
-S'http://lancegatlin.org/tech/?p=1047'
+S'http://lancegatlin.org/tech/?p=1065'
 p11
 sS'checksum'
 p12
-S'292c245e7e31ac09888ef1c8c618f734'
+S'52d57529843012943777eea384482fa7'
 p13
 sS'created_at'
 p14
-I1401088986
+I1401196569
 sS'doctype'
 p15
 S'article'
 p16
 sS'updated_at'
 p17
-I1401201298
+I1401210335
 sS'post_type'
 p18
 S'post'
@@ -45,7 +45,7 @@ p20
 (dp21
 sS'id'
 p22
-I1047
+I1065
 sS'categories'
 p23
 (lp24

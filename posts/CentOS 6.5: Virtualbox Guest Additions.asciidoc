@@ -1,0 +1,62 @@
+CentOS 6.5: Virtualbox Guest Additions
+======================================
+Lance Gatlin <lance.gatlin@gmail.com>
+v1,20-May-2014
+:blogpost-status: unpublished
+:blogpost-categories: git,centos6
+
+== Versions
+1. CentOS 6.5
+2. Virtualbox 4.3.12
+
+== Prerequisites
+1. Install CentOS as Virtualbox Guest
+
+== Install Prereqs
+[source,bash,numbered]
+sudo yum gcc make kernel-devel kernel-devel kernel-headers
+
+== Configure
+Get the kernel version:
+[source,bash,numbered]
+$ uname -r
+2.6.32-431.el6.x86_64
+
+NOTE: VBoxLinuxAdditions.sh looks for the kernel source at $KERN_DIR/${uname -r}. The cp below is to make the directory structure meet its expectations (the default kernel sources folder includes the minor version)
+
+[source,bash,numbered]
+export KERN_DIR=/usr/src/kernels
+sudo cp -R /usr/src/kernels/2.6.32-431.17.1.el6.x86_64 /usr/src/kernels/2.6.32-431.el6.x86_64
+
+== Install
+[source,bash,numbered]
+sudo /media/VBOXADDITIONS_4.3.12_93733/VBoxLinuxAdditions.sh
+
+== Verify
+[source,bash,numbered]
+Checking archive integrity... All good.
+Uncompressing VirtualBox 4.3.12 Guest Additions for Linux............
+VirtualBox Guest Additions installer
+Copying additional installer modules ...
+Installing additional modules ...
+Removing existing VirtualBox non-DKMS kernel modules       [  OK  ]
+Building the VirtualBox Guest Additions kernel modules     [  OK  ]
+Building the main Guest Additions module                   [  OK  ]
+Building the shared folder support module                  [  OK  ]
+Building the OpenGL support module                         [  OK  ]
+Doing non-kernel setup of the Guest Additions              [  OK  ]
+Starting the VirtualBox Guest Additions                    [  OK  ]
+Installing the Window System drivers
+Installing X.Org Server 1.13 modules                       [  OK  ]
+Setting up the Window System to use the Guest Additions    [  OK  ]
+You may need to restart the hal service and the Window System (or just restart the guest system) to enable the Guest Additions.
+Installing graphics libraries and desktop services componen[  OK  ]
+
+== Cleanup
+[source,bash,numbered]
+sudo rm -rf /usr/src/kernels/2.6.32-431.el6.x86_64
+
+== Reboot
+[source,bash,numbered]
+sudo reboot now
+
