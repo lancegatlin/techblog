@@ -13,27 +13,27 @@ v1,20-May-2014
 1. Install CentOS as Virtualbox Guest
 
 == Install Prereqs
-[source,bash,numbered]
+[source,sh,numbered]
 sudo yum gcc make kernel-devel kernel-devel kernel-headers
 
 == Configure
 Get the kernel version:
-[source,bash,numbered]
+[source,sh,numbered]
 $ uname -r
 2.6.32-431.el6.x86_64
 
 NOTE: VBoxLinuxAdditions.sh looks for the kernel source at $KERN_DIR/${uname -r}. The cp below is to make the directory structure meet its expectations (the default kernel sources folder includes the minor version)
 
-[source,bash,numbered]
+[source,sh,numbered]
 export KERN_DIR=/usr/src/kernels
 sudo cp -R /usr/src/kernels/2.6.32-431.17.1.el6.x86_64 /usr/src/kernels/2.6.32-431.el6.x86_64
 
 == Install
-[source,bash,numbered]
+[source,sh,numbered]
 sudo /media/VBOXADDITIONS_4.3.12_93733/VBoxLinuxAdditions.sh
 
 == Verify
-[source,bash,numbered]
+[source,sh,numbered]
 Checking archive integrity... All good.
 Uncompressing VirtualBox 4.3.12 Guest Additions for Linux............
 VirtualBox Guest Additions installer
@@ -53,10 +53,10 @@ You may need to restart the hal service and the Window System (or just restart t
 Installing graphics libraries and desktop services componen[  OK  ]
 
 == Cleanup
-[source,bash,numbered]
+[source,sh,numbered]
 sudo rm -rf /usr/src/kernels/2.6.32-431.el6.x86_64
 
 == Reboot
-[source,bash,numbered]
+[source,sh,numbered]
 sudo reboot now
 

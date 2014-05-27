@@ -1,0 +1,45 @@
+Scala: Use Option instead of null to represent not set
+======================================================
+Lance Gatlin <lance.gatlin@gmail.com>
+v1,8-Apr-2013
+:blogpost-status: unpublished
+:blogpost-categories: scala
+
+In Java, null is commonly used to represent an Object value that is not-set:
+[source,java,numbered]
+----
+class Foo {
+  private String bar = null; // null indicates not-set; not-set by default
+
+  // may return null to indicate that bar is not-set!
+  public String getBar() { return bar; }
+
+  // _bar may be null to set bar to not-set
+  public void setBar(String _bar) { bar = _bar; }
+}
+----
+While Java developers are forced to depend on method documentation to understand the semantics of null, Scala developers can instead code the semantics directly into the type system using Option:
+[source,scala,numbered]
+----
+class Foo(val bar : Option[String] = None)
+----
+This Scala snippet not only eliminates the need to explicitly declare the getter/setter but also removes the need to document nullability. From this declaration, it can be safely assumed that bar is never null and that bar may always be safely dereferenced. By using Option, users of the class are forced to deal with the possibility of bar being not set. In Java, documentation can easily be overlooked. The Java compiler will have no complaints about the following:
+[source,java,numbered]
+----
+...
+Foo foo = new Foo();
+...
+System.out.print(foo.getBar()); // forgot about null!
+----
+This snippet is problematic not just because it might dereference null, but because a NullPointerException doesn't give the user, administrator or even later developers any indication of why the error has occurred. Only a later inspection of the source code and documentation of the getBar method would reveal that the null(not-set) value was not taken into account. If this code was buried in an edge case that is rarely or never exercised, the bug might not surface for years. Scala Option forces users of the Foo class to deal with the not-set state before accessing the value:
+[source,scala,numbered]
+----
+...
+val foo = new Foo();
+...
+foo.bar match {
+  case Some(value) => println(value)
+  case None => println("not set!")
+} 
+----
+

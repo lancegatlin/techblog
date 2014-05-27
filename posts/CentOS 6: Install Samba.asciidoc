@@ -11,7 +11,7 @@ v1, 20-Apr-2013
 3. Windows 7
 
 == Install
-[source,bash,numbered]
+[source,sh,numbered]
 sudo yum install samba
 
 === Configure
@@ -20,19 +20,19 @@ sudo yum install samba
 +
 NOTE: Substitute $SAMBA_USER for samba username
 +
-[source,bash,numbered]
+[source,sh,numbered]
 ----
 sudo useradd $SAMBA_USER
 ----
 +
 2. Set linux user password:
 +
-[source,bash,numbered]
+[source,sh,numbered]
 sudo passwd $SAMBA_USER
 +
 3. Add linux user to samba (use same password)
 +
-[source,bash,numbered]
+[source,sh,numbered]
 sudo smbpasswd -a $SAMBA_USER
 sudo smbpasswd -e $SAMBA_USER
 +
@@ -40,7 +40,7 @@ sudo smbpasswd -e $SAMBA_USER
 +
 NOTE: Substitute $PATH with the absolute path to the directory to share
 +
-[source,bash,numbered]
+[source,sh,numbered]
 mkdir $PATH
 chown -R $SAMBA_USER:$SAMBA_USER $PATH
 +
@@ -48,12 +48,12 @@ NOTE: home directories are shared by the default samba config
 +
 5. Optional: Set selinux context for directory to "samba_share_t" to permit sharing:
 +
-[source,bash,numbered]
+[source,sh,numbered]
 sudo chcon -t samba_share_t $PATH
 +
 6. Optional: Set selinux bool to make home directories shareable:
 +
-[source,bash,numbered]
+[source,sh,numbered]
 sudo setsebool -P samba_enable_home_dirs on
 +
 7. Edit /etc/samba/smb.conf and change the workgroup to match the Windows 7 workgroup:
@@ -82,13 +82,13 @@ NOTE: Substitute $SHARE_NAME with the name of the share
 +
 9. Start services
 +
-[source,bash,numbered]
+[source,sh,numbered]
 sudo service smb start
 sudo service nmb start
 +
 10. Start on boot
 +
-[source,bash,numbered]
+[source,sh,numbered]
 sudo chkconfig smb on
 sudo chkconfig nmb on
 +
