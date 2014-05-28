@@ -8,3 +8,6 @@ blogpost.py was modified to fix the following:
 2. Added tidy_html function to format HTML using the std tidy command
 3. Modified default wordpress.conf to mostly use the asciidoc xhtml11
 4. Modified to store .blogpost files in hidden .blogpost dir
+5. Modified to store blogpost conf and tidy conf file in .blogpost directory
+6. Modified tidy_html to tell tidy to use tidy.conf to allow tidy to correctly recognize html but perform a least-destructive indent on the asciidoc html-snippet output
+7. Modified shell to allow setting expected return code instead of 0 to deal with tidy working but returning 1

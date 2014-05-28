@@ -6,6 +6,8 @@ Copyright: Stuart Rackham (c) 2008
 License:   MIT
 Email:     srackham@gmail.com
 
+Modified by Lance Gatlin <lance.gatlin@gmail.com>
+See MODS for change details
 """
 
 # Suppress warning: "the md5 module is deprecated; use hashlib instead"
@@ -34,7 +36,7 @@ PROG = os.path.basename(os.path.splitext(__file__)[0])
 
 ######################################################################
 # Configuration file parameters.
-# Create a separate configuration file named .blogpost in your $HOME
+# Create a separate configuration file named .blogpost/blogpost.conf in your $HOME
 # directory or use the --conf-file option (see the
 # blogpost_example.conf example).
 # Alternatively you could just edit the values below.
@@ -91,7 +93,7 @@ def load_conf(conf_file):
     """
     execfile(conf_file, globals())
 
-def shell(cmd, stdin=None):
+def shell(cmd, stdin=None, expected_return_codes=[0]):
     '''
     Execute command cmd in shell and return tuple
     (stdoutdata, stderrdata, returncode).
@@ -108,8 +110,8 @@ def shell(cmd, stdin=None):
     if OPTIONS.verbose:
         print stdoutdata
         print stderrdata
-    if popen.returncode != 0:
-        die('%s returned non-zero exit status %d' % (cmd, popen.returncode))
+    if not popen.returncode in expected_return_codes:
+        die('%s returned unexpected exit status %d, expected = %s' % (cmd, popen.returncode,expected_return_codes))
     return (stdoutdata, stderrdata, popen.returncode)
 
 def path_split(path):
@@ -288,7 +290,9 @@ class Blogpost(object):
         self.content = StringIO.StringIO(html)
 
     def tidy_html(self):
-        html = shell('tidy -q -w 0 -indent -xml', self.content.getvalue())[0]
+        home_dir = os.environ.get('HOME')
+        tidy_conf = os.path.join(home_dir, '.blogpost/tidy.conf')
+        html = shell(cmd='tidy -config ' + tidy_conf + ' -q -w 0 -indent', stdin=self.content.getvalue(),expected_return_codes=[0,1])[0]
         self.content = StringIO.StringIO(html)
 
     def sanitize_html(self):
@@ -839,12 +843,13 @@ else:
     # If conf file exists in $HOME directory load it.
     home_dir = os.environ.get('HOME')
     if home_dir is not None:
-        conf_file = os.path.join(home_dir, '.blogpost')
+        conf_file = os.path.join(home_dir, '.blogpost/blogpost.conf')
         if os.path.isfile(conf_file):
             load_conf(conf_file)
     if OPTIONS.conf_file is not None:
         if not os.path.isfile(OPTIONS.conf_file):
             die('missing configuration file: %s' % OPTIONS.conf_file)
+        print("Loading conf file: " + OPTIONS.conf_file)
         load_conf(OPTIONS.conf_file)
     # Validate configuration file parameters.
     if URL is None:

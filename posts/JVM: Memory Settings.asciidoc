@@ -1,0 +1,54 @@
+JVM: Memory Settings
+===================
+Lance Gatlin <lance.gatlin@gmail.com>
+v1,24-Mar-2013
+:blogpost-status: unpublished
+:blogpost-categories: jvm,java
+
+== Versions
+1. Java Oracle JDK 1.6.X
+
+== Heap
+On program startup, Java allocates a certain amount of memory for the heap. This memory is used to fulfill requests for memory allocation by the program or libraries it calls. The Java heap space also has an upper limit that if reached, results in the java.lang.OutOfMemoryError<<sources,[3]>> being thrown. Generally once running, there is no action a program can take to resolve this error. Instead, either set the maximum heap space higher when running the program or use a Java memory profiler to analyze memory usage (there might be a memory leak). It is also possible to redesign the algorithm to use the disk as a temporary swap space, but this should be avoided unless absolutely necessary.
+
+Java allows setting the minimum and maximum heap settings as follows:<<sources,[1]>>
+
+1. -Xms$MIN_VALUE
+2. -Xmx$MAX_VALUE
+
+Values are specified as multiples of 1024 bytes and must be greater than 1 MB. Append 'k' for kilobytes, 'm' for megabytes or 'g' for gigabytes. 
+
+Examples:
+====
+1. -Xms16k
+2. -Xmx32m
+3. -Xmx2g
+====
+
+If these values are not specified at program startup, Java will automatically determine the values to scale with the available system memory.<<sources,[2]>>
+
+== PermGen
+Java uses a separate pre-allocated memory region, called the PermGen, to store class files, string constants and other resources located in jar files. With the exception of very large programs, the default value for PermGen is sufficient. Issues with PermGen are more common when running an application server such as GlassFish or Tomcat that loads jar files on-demand. To fix issues with PermGen, simply raise the default value for the PermGen space. Note that it is possible to create a classloader leak<<sources,[5]>> with on-demand jar file loading.
+
+1. -XX:MaxPermSize
+
+Examples:
+====
+1. -XX:MaxPermSize=128m
+====
+
+== Application Server Tuning
+It is recommended to run application servers such as GlassFish or Tomcat with the following two settings to optimize garbage collection of unused jar resources in PermGen when an application is undeployed.<<sources,[7]>>
+
+1. -XX:+CMSClassUnloadingEnabled
+2. -XX:+CMSPermGenSweepingEnabled
+
+[[sources]]
+== Sources
+1. http://docs.oracle.com/javase/6/docs/technotes/tools/windows/java.html
+2. http://docs.oracle.com/javase/6/docs/technotes/guides/vm/gc-ergonomics.html
+3. http://docs.oracle.com/javase/6/docs/api/java/lang/OutOfMemoryError.html
+4. http://stackoverflow.com/questions/37335/how-to-deal-with-java-lang-outofmemoryerror-java-heap-space-error-64mb-heap
+5. http://frankkieviet.blogspot.ca/2006/10/classloader-leaks-dreaded-permgen-space.html
+6. http://www.oracle.com/technetwork/java/javase/tech/vmoptions-jsp-140102.html
+7. http://stackoverflow.com/questions/88235/dealing-with-java-lang-outofmemoryerror-permgen-space-error
