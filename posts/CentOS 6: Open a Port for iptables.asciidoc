@@ -1,0 +1,73 @@
+CentOS 6: Open a Port for iptables
+==================================
+Lance Gatlin <lance.gatlin@gmail.com>
+v1,28-May-2014
+:blogpost-status: unpublished
+:blogpost-categories: centos6
+
+== Verisons
+1. CentOS 6.5
+
+== Configure
+1. Edit /etc/sysconfig/iptables and add the following before COMMIT
++
+.Typical /etc/sysconfig/iptables:
+----
+# Firewall configuration written by system-config-firewall                      
+# Manual customization of this file is not recommended.                         
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+-A INPUT -p icmp -j ACCEPT
+-A INPUT -i lo -j ACCEPT
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 22 -j ACCEPT
+-A INPUT -j REJECT --reject-with icmp-host-prohibited
+-A FORWARD -j REJECT --reject-with icmp-host-prohibited
+COMMIT
+----
++
+2. If opening TCP port, add the following line above the first reject statement:
++
+----
+-A INPUT -m state --state NEW -m tcp -p tcp --dport <port> -j ACCEPT
+----
++
+NOTE: if tcp or udp wasn't specified assume tcp
++
+3. If udp, instead add the following line above the first reject statement:
++
+----
+-A INPUT -m state --state NEW -m udp -p udp --dport <port> -j ACCEPT
+----
++
+.Example: Open port 666 for tcp
+----
+# Firewall configuration written by system-config-firewall                      
+# Manual customization of this file is not recommended.                         
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+-A INPUT -p icmp -j ACCEPT
+-A INPUT -i lo -j ACCEPT
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 22 -j ACCEPT
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 666 -j ACCEPT
+-A INPUT -j REJECT --reject-with icmp-host-prohibited
+-A FORWARD -j REJECT --reject-with icmp-host-prohibited
+COMMIT
+----
++
+4. Restart iptables
++
+[source,sh,numbered]
+service iptables restart
+
+== Test from remote machine
+
+NOTE: replace $HOSTNAME and $PORT below
+
+[source,sh,numbered]
+telnet $HOSTNAME $PORT
