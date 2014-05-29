@@ -1,0 +1,35 @@
+CentOS 6: Install Scala
+=======================
+Lance Gatlin <lance.gatlin@gmail.com>
+v1,28-May-2014
+:blogpost-status: unpublished
+:blogpost-categories: scala,centos
+
+== Versions
+1. CentOS 6.5
+2. Oracle Java JDK 1.7
+3. Scala 2.11.1
+
+== Install
+[source,sh,numbered]
+wget http://downloads.typesafe.com/scala/2.11.1/scala-2.11.1.tgz
+tar xvf scala-2.11.1.tgz
+sudo mv scala-2.11.1 /usr/lib
+sudo ln -f -s /usr/lib/scala-2.11.1 /usr/lib/scala 
+
+NOTE: you can get other versions at http://www.scala-lang.org/download/all.html
+
+== Configure
+Add to PATH, edit /etc/profile.d/scala.sh
+[source,sh,numbered]
+export PATH=$PATH:/usr/lib/scala/bin
+
+Load into this session:
+[source,sh,numbered]
+source /etc/profile.d/scala.sh
+
+== Verify
+----
+$ scala -version
+Scala code runner version 2.11.1 -- Copyright 2002-2013, LAMP/EPFL
+----

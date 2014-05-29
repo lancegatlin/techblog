@@ -4,6 +4,7 @@ ln -s $PWD/src/blogpost/blogpost.py /usr/bin/blogpost
 ln -s $PWD/src/fake-source-highlight/fake-source-highlight.py /usr/bin/source-highlight
 echo Creating ~/.blogpost config files...
 mkdir ~/.blogpost
+chmod 700 ~/.blogpost
 cp src/blogpost/conf/blogpost_example.conf ~/.blogpost/blogpost.conf
 cp src/blogpost/conf/tidy.conf ~/.blogpost/tidy.conf
 echo Installing asciidoc wordpress backend...
