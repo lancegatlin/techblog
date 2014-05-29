@@ -20,7 +20,7 @@ S'CentOS 6: Set JAVA_HOME'
 p9
 sS'url'
 p10
-S'http://lancegatlin.org/tech/?p=1190'
+S'http://lancegatlin.org/tech/?p=118'
 p11
 sS'checksum'
 p12
@@ -28,14 +28,14 @@ S'beae8add5c3b499e7a139d2ad7d26ea4'
 p13
 sS'created_at'
 p14
-I1401346786
+I1363077947
 sS'doctype'
 p15
 S'article'
 p16
 sS'updated_at'
 p17
-I1401389419
+I1401392453
 sS'post_type'
 p18
 S'post'
@@ -45,7 +45,7 @@ p20
 (dp21
 sS'id'
 p22
-I1190
+I118
 sS'categories'
 p23
 (lp24

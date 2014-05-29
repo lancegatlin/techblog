@@ -33,7 +33,7 @@ sudo alternatives --install /usr/bin/java java /usr/java/latest/bin/java $PRIORI
 
 == Configure
 1. Add JAVA_HOME to environment variables
-** See link:centos-6-set-java_home[CentOS 6: Set JAVA_HOME]
+** See link:centos-6-set-java_home.asciidoc[CentOS 6: Set JAVA_HOME]
 
 == Verify
 ----
