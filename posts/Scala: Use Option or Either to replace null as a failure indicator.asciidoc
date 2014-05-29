@@ -14,7 +14,7 @@ class Foo {
 }
 ----
 Java developers must depend on documentation to explain if null is a possible return value, and if it is, what the meaning of null is. In this case, null is used to indicate the operation of readInt failed. Scala developers have a couple of options here:
-[source,java,numbered]
+[source,scala,numbered]
 ----
 class Foo {
   // None indicates failure!
@@ -22,7 +22,7 @@ class Foo {
 }
 ----
 In this Scala snippet, it is explicit that the function may not return a value. However, it is still not clear that None indicates failure and this should still be documented. Generally, I like to have as much information as possible about failures. This final Scala snippet uses Either to remove any ambiguity:
-[source,java,numbered]
+[source,scala,numbered]
 ----
 class Foo {
   def readInt() : Either[Exception, Int] = { ... }
