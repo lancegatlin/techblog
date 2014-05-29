@@ -1,0 +1,27 @@
+Linux: Test a SOAP web service using curl
+=========================================
+Lance Gatlin <lance.gatlin@gmail.com>
+v1,28-May-2014
+:blogpost-status: unpublished
+:blogpost-categories: linux
+
+Curl is a linux command-line HTTP tool.
+
+Sample SOAP Message:
+[source,xml,numbered]
+----
+<?xml version='1.0' encoding='utf-8'?>
+<soapenv:Envelope xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope">
+  <soapenv:Body>
+    <ns0:some_operation xmlns:ns0="http://some_ns_uri"/>
+  </soapenv:Body>
+</soapenv:Envelope>
+----
+
+Sample curl command to transmit SOAP message to a SOAP service (with --data curl will automatically POST):
+
+NOTE: replace $HOSTNAME,$PORT and $SOMEPATH below
+
+[source,sh,numbered]
+curl --header "content-type: text/soap+xml; charset=utf-8"--data @sample.xml http://$HOSTNAME:$PORT/$SOMEPATH
+

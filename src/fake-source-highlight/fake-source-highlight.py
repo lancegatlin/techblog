@@ -2,7 +2,7 @@
 
 # Fake for source-highlight that wraps stdin in <pre></pre> block only. To use, uninstall gnu source-highlighter and copy this to path.
 
-import sys, getopt
+import sys, getopt, cgi
 
 def main(argv):
   lang=''
@@ -25,6 +25,7 @@ def main(argv):
   write('<pre class="lang:{lang}">'.format(lang=lang))
   content = sys.stdin.read()
   content = content.rstrip('\n')
+  content = cgi.escape(content).encode('ascii','xmlcharrefreplace')
   write(content)
   write('</pre>')
 

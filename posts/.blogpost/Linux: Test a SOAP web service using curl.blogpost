@@ -16,26 +16,26 @@ S'unpublished'
 p7
 sS'title'
 p8
-S'Scala: Use Option or Either to replace null as a failure indicator'
+S'Linux: Test a SOAP web service using curl'
 p9
 sS'url'
 p10
-S'http://lancegatlin.org/tech/?p=1081'
+S'http://lancegatlin.org/tech/?p=300'
 p11
 sS'checksum'
 p12
-S'a3cf87efb205bb7b888105d98cbbcc79'
+S'2ea904b032147a74241e9b7142737229'
 p13
 sS'created_at'
 p14
-I1401176681
+I1363376506
 sS'doctype'
 p15
 S'article'
 p16
 sS'updated_at'
 p17
-I1401328291
+I1401386499
 sS'post_type'
 p18
 S'post'
@@ -45,10 +45,10 @@ p20
 (dp21
 sS'id'
 p22
-I1081
+I300
 sS'categories'
 p23
 (lp24
-S'scala'
+S'linux'
 p25
 asb.

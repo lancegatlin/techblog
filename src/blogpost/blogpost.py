@@ -292,7 +292,7 @@ class Blogpost(object):
     def tidy_html(self):
         home_dir = os.environ.get('HOME')
         tidy_conf = os.path.join(home_dir, '.blogpost/tidy.conf')
-        html = shell(cmd='tidy -config ' + tidy_conf + ' -q -w 0 -indent', stdin=self.content.getvalue(),expected_return_codes=[0,1])[0]
+        html = shell(cmd='tidy -config ' + tidy_conf + ' -q -w 0 -indent', stdin=self.content.getvalue(),expected_return_codes=[0,1,2])[0]
         self.content = StringIO.StringIO(html)
 
     def sanitize_html(self):
