@@ -1,0 +1,48 @@
+CentOS 6: Install Oracle JDK
+============================
+Lance Gatlin <lance.gatlin@gmail.com>
+v1,28-May-2014
+:blogpost-status: unpublished
+:blogpost-categories: centos,java
+
+== Versions
+1. CentOS 6.5
+
+NOTE: After completing this guide, java-openjdk will still be a yum dependency and if not already installed, will be installed later by other packages that have the Java JDK as a dependency. There are Sun compatibility RPMs that can be downloaded to fix this, but the version support is old. For more information, see <<sources,Sources>> below.
+
+== Install
+
+1. Download the appropriate file (ex: jdk-7u17-linux-x64.tar.gz) JDK from the http://www.oracle.com/technetwork/java/javase/downloads/index.html?ssSourceSiteId=otnjp[Oracle website].
++
+NOTE: replace $JDK_FILENAME with the name of the file
++
+.Extract as necessary and install JDK rpm:
+[source,sh,numbered]
+sudo yum localinstall $JDK_FILENAME
++
+.Example:
+[source,sh,numbered]
+sudo yum localinstall jdk-7u17-linux-x64.tar.gz
++
+2. Add java as alternative for /usr/bin/java:
++
+NOTE: Default priority of open-jdk 1.7 is 17000. Replace $PRIORITY below with a number higher than the default priority.
++
+[source,sh,numbered]
+sudo alternatives --install /usr/bin/java java /usr/java/latest/bin/java $PRIORITY
+
+== Configure
+1. Add JAVA_HOME to environment variables
+** See link:centos-6-set-java_home[CentOS 6: Set JAVA_HOME]
+
+== Verify
+----
+$ java -version
+java version "1.7.0_17"
+Java(TM) SE Runtime Environment (build 1.7.0_17-b02)
+Java HotSpot(TM) 64-Bit Server VM (build 23.7-b01, mixed mode)
+----
+
+[[sources]]
+== Sources
+1. https://www.redbridge.se/blog/-/blogs/properly-installing-oracle-s-jdk-on-centos-rhel-or-scientific-linux

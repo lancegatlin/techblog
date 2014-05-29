@@ -1,0 +1,27 @@
+CentOS 6: Set JAVA_HOME
+=======================
+Lance Gatlin <lance.gatlin@gmail.com>
+v1,28-May-2014
+:blogpost-status: unpublished
+:blogpost-categories: centos,java
+
+== Versions
+1. CentOS 6.5
+
+== Install
+1. Edit /etc/profile.d/java.sh:
++
+NOTE: Replace $JAVA_HOME below with the absolute path to the java distribution. If Oracle JDK is installed $JAVA_HOME is /usr/java/latest
++
+[source,sh,numbered]
+export JAVA_HOME=$JAVA_HOME
++
+2. Load into current session:
+[source,sh,numbered]
+source /etc/profile.d/java.sh
+
+== Verify
+----
+$ echo $JAVA_HOME
+/usr/java/latest
+----
