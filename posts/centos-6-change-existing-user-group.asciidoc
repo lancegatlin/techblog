@@ -1,0 +1,23 @@
+CentOS 6: Change existing user group
+====================================
+Lance Gatlin <lance.gatlin@gmail.com>
+v1,28-May-2014
+:blogpost-status: unpublished
+:blogpost-categories: centos
+
+View user info:
+----
+$ id user
+uid=500(user) gid=10(wheel) groups=10(wheel)
+$
+----
+
+To change existing user's primary group:
+[source,sh,numbered]
+usermod -g $PRIMARY_GROUP $USER
+
+To change existing user's supplementary group:
+[source,sh,numbered]
+usermod -a -G $SUPPLEMENTARY_GROUP $USER
+
+

@@ -1,0 +1,36 @@
+CentOS 6: Install sudo and setup sudoers to use wheel group
+===========================================================
+Lance Gatlin <lance.gatlin@gmail.com>
+v1,30-May-2014
+:blogpost-status: unpublished
+:blogpost-categories: centos6
+
+== Versions
+
+1. CentOS 6.5
+
+== Install
+NOTE: must be logged in as superuser
+
+[source,sh,numbered]
+yum install sudo
+
+== Configure
+1. Add write access to /etc/sudoers before edit:
++
+[source,sh,numbered]
+chmod u+w /etc/sudoers
++
+2. Edit /etc/sudoers and uncomment this line:
++
+----
+## Allows people in group wheel to run all commands
+%wheel	ALL=(ALL)	ALL
+----
++
+3. Remove write access otherwise sudo won't run:
++
+[source,sh,numbered]
+chmod u-w /etc/sudoers
++
+NOTE: user must have primary group as wheel to sudo. See link:centos-6-change-existing-user-group.asciidoc[CentOS 6: Change existing user group]

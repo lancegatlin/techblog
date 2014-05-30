@@ -1,0 +1,26 @@
+Linux: Test REST web service using curl
+=======================================
+Lance Gatlin <lance.gatlin@gmail.com>
+v1,30-May-2014
+:blogpost-status: unpublished
+:blogpost-categories: linux
+
+Curl is a linux command-line HTTP tool.
+
+NOTE: Replace $URL in examples below, e.g. http://somehost:2222/path/to/endpoint
+
+Test REST GET:
+[source,sh,numbered]
+curl $URL
+
+
+Test REST GET with OAuth token in header:
+
+[source,sh,numbered]
+curl --header "Authorization: Bearer XXXXXXX" $URL
+
+Test REST POST:
+[source,sh,numbered]
+curl --header "content-type: text/xml; charset=utf-8" --data @sample.xml $URL
+
+NOTE: content-type here is XML but could be anything.

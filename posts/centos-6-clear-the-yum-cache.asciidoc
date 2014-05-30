@@ -1,0 +1,33 @@
+CentOS 6: Clear the yum cache
+=============================
+Lance Gatlin <lance.gatlin@gmail.com>
+v1,18-Mar-2013
+:blogpost-status: unpublished
+:blogpost-categories: centos6
+
+== Versions
+1. CentOS 6.3
+
+== Overview
+Ran into problems tonight after working installs of Hadoop of different versions where the yum installer would try to download the incorrect version. Required cleaning yum's caches AND manually deleting the yum cache for the repo in /var/cache/yum.
+
+== Guide
+1. Remove the repo
++
+NOTE: replace $REPONAME below with the name of the repo to clear
++
+[source,sh,numbered]
+sudo rm /etc/yum.repos.d/$REPONAME.repo
++
+2. Clean all
++
+[source,sh,numbered]
+sudo yum clean all
++
+3. Delete the yum cache for the repo
++
+[source,sh,numbered]
+sudo rm -rf /var/cache/yum/x86_64/6/$REPONAME
+
+== Sources
+1. http://www.centos.org/docs/5/html/yum/sn-yum-maintenance.html

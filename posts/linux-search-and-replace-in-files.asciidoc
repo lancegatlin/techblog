@@ -1,0 +1,27 @@
+Linux: Search and replace in files
+==================================
+Lance Gatlin <lance.gatlin@gmail.com>
+v1,28-May-2014
+:blogpost-status: unpublished
+:blogpost-categories: linux
+
+== Overview
+Just a quick recipe for performing search & replace on many files at once.
+
+== Recipe
+[NOTE]
+====
+* Replace $NAME with find match specifier, e.g. "*.php"
+* Replace $SEARCH_LITERAL and $REPLACE_LITERAL with unquoted search/replace strings
+** Search/replace strings must escape forward-slash('/') with back-slash('\'), e.g. http:\/\/asdf.com
+====
+.Recipe
+[source,sh,numbered]
+find . -name $NAME -print | xargs sed -i 's/$SEARCH_LITERAL/$REPLACE_LITERAL/g'
+
+.Example to perform replace all occurrences of 'foo' with 'bar' in all php files
+[source,sh,numbered]
+find . -name "*.php" -print | xargs sed -i 's/foo/bar/g'
+
+== Source
+1. http://rushi.wordpress.com/2008/08/05/find-replace-across-multiple-files-in-linux/

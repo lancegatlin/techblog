@@ -1,0 +1,33 @@
+CentOS 6: Install EPEL yum repository
+=====================================
+Lance Gatlin <lance.gatlin@gmail.com>
+v1,30-May-2014
+:blogpost-status: unpublished
+:blogpost-categories: centos6
+
+== Versions
+1. CentOS 6.5 
+2. EPEL 6.8
+
+== Install
+
+NOTE: replace $MAJOR and $MINOR with the desired major and minor release. as of this writing it is 6 & 8
+
+[source,sh,numbered]
+wget http://dl.fedoraproject.org/pub/epel/$MAJOR/x86_64/epel-release-$MAJOR-$MINOR.noarch.rpm
+sudo rpm -Uvh epel-release-$MAJOR-$MINOR.noarch.rpm
+
+.Example
+[source,sh,numbered]
+wget http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+sudo rpm -Uvh epel-release-6-8.noarch.rpm
+
+To discover latest major/minor, visit: http://dl.fedoraproject.org/pub/epel
+
+== Verify
+----
+$ head /etc/yum.repos.d/epel.repo
+[epel]
+name=Extra Packages for Enterprise Linux 6 - $basearch
+...
+----

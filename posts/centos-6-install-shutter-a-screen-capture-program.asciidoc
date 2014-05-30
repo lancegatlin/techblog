@@ -1,0 +1,23 @@
+CentOS 6: Install Shutter a screen capture program
+==================================================
+Lance Gatlin <lance.gatlin@gmail.com>
+v1,30-May-2014
+:blogpost-status: unpublished
+:blogpost-categories: centos6
+
+== Versions
+1. CentOS 6.5
+
+== Prerequisites
+1. link:centos-6-install-epel-yum-repository[CentOS 6: Install EPEL yum repository]
+
+== Install
+[source,sh,numbered]
+sudo yum localinstall http://li.nux.ro/download/nux/dextop/el6/x86_64/nux-dextop-release-0-2.el6.nux.noarch.rpm 
+sudo yum install shutter
+
+== Start
+----
+$ shutter
+----
+
