@@ -9,7 +9,7 @@ v1,30-May-2014
 1. CentOS 6.5
 
 == Prerequisites
-1. link:centos-6-install-epel-yum-repository[CentOS 6: Install EPEL yum repository]
+1. link:centos-6-install-epel-yum-repository.asciidoc[CentOS 6: Install EPEL yum repository]
 
 == Install
 [source,sh,numbered]
