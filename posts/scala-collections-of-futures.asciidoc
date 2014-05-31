@@ -11,7 +11,7 @@ v1,31-May-2014
 == Overview
 One of my favorite things about Scala is the amazing collections library. Scala's collections library combines the best of standard functional idioms with an OOP call style. This makes for some down right beautiful code. However -- after working with Scala for a bit over a year now, it has become very apparent to me that the Scala collection's library was not written with asyncronous/reactive programming in mind. 
 
-NOTE: Scala standard library futures are not lazy. Once they are constructed, they are "hot" -- executing immediately. There are other libraries whose futures implementation is lazy (such as Scalaz<<sources,^2^>>). Lazy futures allow building up an execution "plan" which is eventually run by the ultimate caller. This approach has many advantages, but sadly is not the direction Scala took. This article focuses exclusively on the Scala standard library Future<<sources,^1^>>. 
+NOTE: The Scala/Akka standard library +Future+ is not lazy. Once a +Future+ is constructed, it is "hot" -- executing immediately. There are other libraries whose Future implementation is lazy (such as Scalaz<<sources,^2^>>). Lazy futures allow building up an execution "plan" which is eventually run by the ultimate caller. This approach has many advantages, but sadly is not the direction Scala/Akka took. This article focuses exclusively on the Scala/Akka standard library Future<<sources,^1^>>. 
 
 [NOTE]
 ====
@@ -19,13 +19,19 @@ I've tried to make sure all of the code examples here can be pasted directly int
 [source,scala,numbered]
 ----
 import scala.concurrent._
+import scala.concurrent.duration._
 import ExecutionContext.Implicits.global
 ----
 Make sure you paste this into the console before trying the examples below.
 ====
-== Gotcha #1
-Once I decided to start using Futures, they started to bleed into function return signatures everywhere. One place in particular that they started to show up was in the service layer:
-[souce,scala,numbered]
+
+NOTE: Scala has wonderful type inference which ordinarinally makes it unnecessary to explicitly declare the type of vals. However, for maximum readability in my examples, I explicitly label the type of vals.
+
+== Calling a method that returns a +Future+ N times
+Once I decided to start using Futures, they started to bleed into function return-type signatures everywhere. One place in particular that they started to show up was in the service layer:
+
+.Listing 1
+[source,scala,numbered]
 ----
 trait MyService {
   def doSomething(i: Int) : Future[Unit]
@@ -34,44 +40,187 @@ class MyServiceImpl extends MyService {
  def doSomething(i: Int) : Future[Unit] = Future { Thread.sleep(500);println(i) }
 }
 ----
-Using a service layer like this seems straightforward, until you need to call it N times:
+Using a service layer like this was straightforward, until I needed to call it N times:
+
+.Listing 2
 [source,scala,numbered]
 ----
-val svc = new MyServiceImpl
-val someInts = (1 to 20).toList
-val result = someInts.foreach(svc.doSomething _)
+val svc : MyService = new MyServiceImpl
+val someInts : List[Int] = (1 to 20).toList
+val result : Unit = someInts.foreach(svc.doSomething _)
 ----
-This was my first intuition about how to call the service N times. It seemed straightforward to me. But what this actually does is instantly create a +List[Future[Unit]]+ of 20 "hot" futures -- *all* 20 futures have been submitted for execution! While this might be ok for 20 futures, it's not ok for 1000, 10,000 or 100,000 futures. 
+This was my first intuition about how to call the service N times. It seemed straightforward to me at the time and it even compiles and runs! But what this actually does is immediately create a +List[Future[Unit]]+ of 20 "hot" futures -- all 20 futures have been submitted for execution! While this might be ok for 20 futures, it's not ok for 1,000, 10,000 or 100,000+ futures. 
 
-Internally, the executor stores futures in a queue and executes as many futures as it has workers simulatenously. Dumping too many futures into the executor at once can cause an out of memory error and starve other code that uses the same executor. Definitely not what I wanted. 
+Internally, the executor stores futures in a queue and executes as many futures as it has workers simulatenously. Dumping too many futures into the executor queue at once will starve other code that uses the same executor and can cause an out of memory error. Definitely not what I wanted. 
 
-Also, there is another problem here: each future returned by +svc.doSomething+ is discarded by assignment to Unit. Not only am I not properly waiting on my futures to complete, but by assigning my +Future+ to +Unit+, I'm throwing away any exception that might be thrown! Also not what I want.
+Also, there is another problem here: each future returned by +svc.doSomething+ is discarded by assignment to +Unit+. Not only am I not properly waiting on my futures to complete, but by assigning my +Future+ to +Unit+, I'm throwing away any exception that might be thrown! Also not what I want.
 
-TIP: Assigning a +Future+ to Unit is always an error. Perhaps in the future the compiler will emit a warning about this, but for now the only way to discover this is by code review of programmers who may be new to futures. Even worse, for actions returned in futures that complete quickly and are 99% exception free, this bug might go unnoticed for sometime.
+TIP: Assigning a +Future+ to +Unit+ is always an error. Perhaps in the future the compiler will emit a warning about this, but for now the only way to discover this is by code review of programmers who may be new to futures. Even worse, this code may not fail at runtime. For actions returned in futures that complete quickly and are 99% exception free, this bug might go unnoticed for sometime.
 
-== Stop discarding Futures
-So what can I do?  should stop assigning our +Future+s to +Unit+. Also, we need to somehow regulate the flow of how many futures go "hot" simulatenously and then have a way to continue once all futures have completed.
+== Never assign +Future+ to +Unit+
+So what can I do?  I need to stop assigning +Future+ to +Unit+. I can do this by using map instead of foreach. Also, I need a way to properly wait for all my futures to complete: 
+
+.Listing 3
 [source,scala,numbered]
 ----
-val futResult = 
+val futResult : Future[List[Unit]] = 
   Future.sequence { 
     someInts.map(svc.doSomething _) // <1>
   } // <2>
-val result = Await(futResult,Duration.Inf) // <3>
+val listResult : List[Unit] = Await.result(futResult,Duration.Inf) // <3>
+val result : Unit = listResult // <4>
 ----
-<1> Use map instead of foreach, to ensure we don't discard any futures
+<1> Use map instead of foreach to ensure I don't discard any futures
 <2> Use +Future.sequence+ to convert a +List[Future[Unit]]+ to +Future[List[Unit]]+
-<3> Properly wait on our futures to complete
+<3> Properly wait on all my futures to complete
+<4> Now that I've waited on all my futures, I can safely discard my List[Unit] because no exceptions were thrown
 
-== Controlling the flow of Future execution
+If any exceptions are thrown during +svc.doSomething+ calls, the exception will percolate up through +Await.result+. But how can I stop dumping all futures into the executor at once?
 
-== Future.sequence and the functional "sequence" idiom.
+.Future.sequence and the functional "sequence" idiom
+****
 Most of this is standard Scala collections stuff, but what is +Future.sequence+? +Future.sequence+ is a +Future+ specific version of the "sequence" functional idiom (not to be confused with the Scala collection type +Sequence+). There is much more to know about "sequence", but it is basically a way to invert the nesting of two monads, i.e. +G[F[\_]]+ to +F[G[_]]+ (given certain properties of types G and F). Unfortunately, standard Scala requires some compiler magic<<sources,^3^>> to generically implement sequence. Without resorting to this magic, one must simply repeatedly copy the pattern of sequence for different monad types, such as has been done for +Future.sequence+.
 
-+Future.sequence+ also takes care of waiting for all of our futures to complete. In this example, result is of type +Future[List[String]]+, which is completed once all of our futures complete
+In addition to making +Future+ the outer monad, +Future.sequence+ also takes care of waiting for all of our futures to complete. In listing 3, +futResult+ is of type +Future[List[Unit]]+, which is completed once all of our futures complete
+****
 
-== Problems with Pattern #1
-Pattern #1 solves the problem of regulating the flow "hot" futures, but there is a problem here. In Pattern #1, 
+== Controlling the flow of Future execution
+I've solved the problem of discarding futures, but I still need to somehow regulate the flow of how many futures go "hot" simulatenously.
+
+.Listing 4
+[source,scala,numbered]
+----
+val listResult : List[Unit] = 
+    someInts
+      .grouped(3) // <1>
+      .toList
+      .map { group => // <2>
+        val innerFutResult : Future[List[Unit]] =
+          Future.sequence {
+            group.map(svc.doSomething _)      
+          }
+        Await.result(innerFutResult, Duration.Inf) // <3>
+      }
+      .flatten // <4>
+val result : Unit = listResult
+----
+<1> Group someInts into a group size that I want to execute simulatenously
+<2> Map each group to a +Future[List[Unit]]+
+<3> Use +Await.result+ inside the map to wait for each group to complete
+<4> Because I divided someInts into groups, I need to flatten the results (Note: this isn't strictly necessary for +Unit+ here as we are going to discard List[Unit] anyway, but it would be necessary for return-types other than +Unit+)
+
+Ok this works. I've ensured that no more than N svc.doSomething calls are happening at once and exceptions are never discarded. However, this pattern has a fatal flaw. It does not pass a future back as a result. For the purposes of writing example code, this kind of example gets the job done. However, when writing code that will live in an asyncronous eco-system, I must make my result a +Future+.
+
+TIP: When writing a method that calls other functions or methods that return +Future+, I need to make sure to return a Future to callers of my method. This allows callers to use the Future of my method's value in the same way that I did when I called other methods that returned me a +Future+.
+
+== Returning a Future to callers
+This has gotten complicated fast! But I feel like I'm almost there, so I will keep going. I'm modifying Listing 3 to ensure my result is a +Future+:
+
+.Pattern 1.0
+[source,scala,numbered]
+----
+val futResult : Future[List[Unit]] = 
+    someInts
+      .grouped(3)
+      .toList
+      .foldLeft(Future.successful(List[Unit])) { (futAccumulator,group) => // <1>
+        futAccumulator.flatMap { accumulator => // <2>
+          val futInnerResult : Future[List[Unit]] =
+            Future.sequence {
+              group.map(svc.doSomething _)      
+            }
+          futInnerResult.map(innerResult => accumulator ::: innerResult) // <3>
+        }
+      }
+      .map(_.flatten) // <4>
+val result : Unit = Await.result(futResult,Duration.Inf)
+----
+<1> I've replaced map with +foldLeft+. This will ensure that each group is processed one at a time, from left to right and will accumulate the +Future[List[Unit]]+ result after each group completes
+<2> +Future.flatMap+ is used here instead of +Future.map+ to flatten the inner return type of +Future[List[Unit]] over the entire collection (+Future.map+ would return +Future[Future[List[Unit]]]+).
+<3> After a group completes, the result accumulates
+<4> Finally, flatten +Future[List[List[Unit]]+ to +Future[List[Unit]]+
+
+Ok this is much better. I'm ensuring that I don't discard exceptions, I control the flow of futures AND now I return a Future to callers. But I call a +Future+ returning method N times in many places. This is a pretty tedious pattern to have to repeat everywhere. Scala gives me some amazing utilities for cleaning up complexity like this.
+
+== Pimp My Future: Pattern 1.1
+I'm going to cleanup Pattern 1.0 using a for-comprehension and the 'Pimp-My-Library Pattern'<<sources,^5^>> with the Scala 'Value Class'<<sources,^6^>>. The pimp-my-library pattern allows creating an implicit wrapper class that can "add" a method to an existing class, essentially making an OOP style call convention for the new method. The Value Class (added in Scala 2.10) makes the implicit wrapper class free -- the compiler optimizes away the wrapper in emitted bytecode.
+
+.Listing 4
+[source,scala,numbered]
+----
+  implicit class Future_PimpMyFuture[T](val self: Future[T]) extends AnyVal {
+    def get : T = Await.result(self, Duration.Inf)
+  }
+  implicit class Future_PimpMyTraversableOnceOfFutures[A, M[AA] <: TraversableOnce[AA]](val self: M[Future[A]]) extends AnyVal {
+    /** @return a Future of M[A] completes once all futures have completed */
+    def sequence(implicit cbf: CanBuildFrom[M[Future[A]], A, M[A]], ec: ExecutionContext) : Future[M[A]] =
+      Future.sequence(self)
+  }
+----
+
+.Pattern 1.1
+[source,scala,numbered]
+----
+val futResult : Future[Unit] = 
+    someInts
+      .grouped(3)
+      .toList
+      .foldLeft(Future.successful(List[Unit])) { (futAccumulator,group) =>
+        for { // <1>
+          accumulator <- futAccumulator
+          innerResult <- group.map(svc.doSomething _).sequence // <2>
+        } yield accumulator ::: result
+      }
+      .map(_.flatten)
+
+val result : Unit = futResult.get // <3>
+----
+<1> Replaced +Future.flatMap+ and nested +Future.map+ with a much cleaner more readable for-comprehension<<sources,^7^>>
+<2> Replaced +Future.sequence+ with sugar method
+<3> Replace +Await.result+ with sugar method
+
+I like the OOP style call convention, but this pattern is still tedious. Perhaps, I can make this even simpler?
+
+== Pimp My Future: Pattern 1.2
+I'm going to further cleanup Pattern 1.1 by capturing the generic code pattern here into another method on the +Future_PimpMyTraversableOnceOfFutures+ class.
+
+.Listing 5
+[source,scala,numbered]
+----
+  implicit class Future_PimpMyFuture[T](val self: Future[T]) extends AnyVal {
+    def get : T = Await.result(self, Duration.Inf)
+  }
+  implicit class Future_PimpMyTraversableOnceOfFutures[A, M[AA] <: TraversableOnce[AA]](val self: M[Future[A]]) extends AnyVal {
+    /**
+     * @param groupSize maximum number of futures to submit to executor at same time
+     * @return a Future of M[A] completes once all futures have completed. Futures are submitted to executor in groupSize chunks. */
+    def sequence(implicit cbf: CanBuildFrom[M[Future[A]], A, M[A]], ec: ExecutionContext) : Future[M[A]] =
+      Future.sequence(self)
+    /** @return a Future of M[B] that completes once all futures have completed */
+    def mapAsync[B](groupSize: Int)(f: A => Future[B])(implicit cbf: CanBuildFrom[M[Future[A]], A, M[A]], ec: ExecutionContext) : Future[M[B]] = {
+      self
+       .foldLeft(Future.successful(List[Unit])) { (futAccumulator,group) =>
+         for { // <1>
+           accumulator <- futAccumulator
+           innerResult <- group.map(svc.doSomething _).sequence
+         } yield accumulator ::: result
+       }
+       .map(_.flatten)    
+  }
+----
+
+.Pattern 1.2
+[source,scala,numbered]
+----
+val futResult : Future[Unit] = 
+    someInts.mapAsync(3)(svc.doSomething _)
+val result : Unit = futResult.get
+----
+
+Much better! My code is now simple, readable, idiomatic, doesn't discard exceptions, doesn't flood the executor with futures and returns a future to the caller! 
+
+== Further Exploration: Problems with Pattern 1
+Pattern 1 solves the problem of discarding exceptions, regulating the flow of "hot" futures and returning a future to callers, but it isn't the most efficient way of handling this problem. Because it has to wait for each group to complete, one of the +svc.doSomething+ calls could take an extra long time. If it does, even though the other futures in its group have completed, I have to wait for that one long call to complete before moving to the next group. Ideally, I should make it so that there are always N futures running simultaneously instead of grouping them.
 
 [[sources]]
 == Sources
@@ -79,3 +228,6 @@ Pattern #1 solves the problem of regulating the flow "hot" futures, but there is
 2. https://github.com/scalaz/scalaz
 3. http://stackoverflow.com/questions/8736164/what-are-type-lambdas-in-scala-and-what-are-their-benefits
 4. http://stackoverflow.com/questions/6750609/list-of-options-equivalent-of-sequence-in-scala
+5. http://www.artima.com/weblogs/viewpost.jsp?thread=179766
+6. http://docs.scala-lang.org/overviews/core/value-classes.html
+7. http://stackoverflow.com/questions/12792595/how-to-convert-this-map-flatmap-into-a-for-comprehension-in-scala
