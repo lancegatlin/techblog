@@ -178,12 +178,12 @@ val result : Unit = futResult.get // # <3>
 I like the OOP style call convention, but this pattern is still tedious. Perhaps, I can make this even simpler?
 
 == Pimp My Future: Pattern 1.2
-I'm going to further cleanup Pattern 1.1 by creating another pimp-my-library method on a new value class +Future_PimpMyIterable+.
+I'm going to further cleanup Pattern 1.1 by creating another pimp-my-library method on a new value class +Future_PimpMyTraversableOnce+.
 
 .Listing 5
 [source,scala,numbered]
 ----
-  implicit class Future_PimpMyIterable[A, M[AA] <: Iterable[AA]](val self: M[A]) extends AnyVal {
+  implicit class Future_PimpMyTraversableOnce[A, M[AA] <: TraversableOnce[AA]](val self: M[A]) extends AnyVal {
     /** @return a Future of M[B] that completes once all futures have completed */
     def mapAsync[B](groupSize: Int)(f: A => Future[B])(implicit
       cbf: CanBuildFrom[M[Future[A]], A, M[A]],
@@ -202,7 +202,7 @@ I'm going to further cleanup Pattern 1.1 by creating another pimp-my-library met
     }
   }
 ----
-<1> Using list here for efficient accumulation of results
+<1> Convert to +List+ here for efficient accumulation of results (and no grouped method on +TraversableOnce+)
 <2> Convert back to desired collection
 
 .Pattern 1.2
