@@ -1,0 +1,81 @@
+Scala: Collections of Futures
+=============================
+Lance Gatlin <lance.gatlin@gmail.com>
+v1,31-May-2014
+:blogpost-status: unpublished
+:blogpost-categories: scala
+
+== Version
+1. Scala 2.11.1
+
+== Overview
+One of my favorite things about Scala is the amazing collections library. Scala's collections library combines the best of standard functional idioms with an OOP call style. This makes for some down right beautiful code. However -- after working with Scala for a bit over a year now, it has become very apparent to me that the Scala collection's library was not written with asyncronous/reactive programming in mind. 
+
+NOTE: Scala standard library futures are not lazy. Once they are constructed, they are "hot" -- executing immediately. There are other libraries whose futures implementation is lazy (such as Scalaz<<sources,^2^>>). Lazy futures allow building up an execution "plan" which is eventually run by the ultimate caller. This approach has many advantages, but sadly is not the direction Scala took. This article focuses exclusively on the Scala standard library Future<<sources,^1^>>. 
+
+[NOTE]
+====
+I've tried to make sure all of the code examples here can be pasted directly into the Scala console. Some boilerplate is required to make these work:
+[source,scala,numbered]
+----
+import scala.concurrent._
+import ExecutionContext.Implicits.global
+----
+Make sure you paste this into the console before trying the examples below.
+====
+== Gotcha #1
+Once I decided to start using Futures, they started to bleed into function return signatures everywhere. One place in particular that they started to show up was in the service layer:
+[souce,scala,numbered]
+----
+trait MyService {
+  def doSomething(i: Int) : Future[Unit]
+}
+class MyServiceImpl extends MyService {
+ def doSomething(i: Int) : Future[Unit] = Future { Thread.sleep(500);println(i) }
+}
+----
+Using a service layer like this seems straightforward, until you need to call it N times:
+[source,scala,numbered]
+----
+val svc = new MyServiceImpl
+val someInts = (1 to 20).toList
+val result = someInts.foreach(svc.doSomething _)
+----
+This was my first intuition about how to call the service N times. It seemed straightforward to me. But what this actually does is instantly create a +List[Future[Unit]]+ of 20 "hot" futures -- *all* 20 futures have been submitted for execution! While this might be ok for 20 futures, it's not ok for 1000, 10,000 or 100,000 futures. 
+
+Internally, the executor stores futures in a queue and executes as many futures as it has workers simulatenously. Dumping too many futures into the executor at once can cause an out of memory error and starve other code that uses the same executor. Definitely not what I wanted. 
+
+Also, there is another problem here: each future returned by +svc.doSomething+ is discarded by assignment to Unit. Not only am I not properly waiting on my futures to complete, but by assigning my +Future+ to +Unit+, I'm throwing away any exception that might be thrown! Also not what I want.
+
+TIP: Assigning a +Future+ to Unit is always an error. Perhaps in the future the compiler will emit a warning about this, but for now the only way to discover this is by code review of programmers who may be new to futures. Even worse, for actions returned in futures that complete quickly and are 99% exception free, this bug might go unnoticed for sometime.
+
+== Stop discarding Futures
+So what can I do?  should stop assigning our +Future+s to +Unit+. Also, we need to somehow regulate the flow of how many futures go "hot" simulatenously and then have a way to continue once all futures have completed.
+[source,scala,numbered]
+----
+val futResult = 
+  Future.sequence { 
+    someInts.map(svc.doSomething _) // <1>
+  } // <2>
+val result = Await(futResult,Duration.Inf) // <3>
+----
+<1> Use map instead of foreach, to ensure we don't discard any futures
+<2> Use +Future.sequence+ to convert a +List[Future[Unit]]+ to +Future[List[Unit]]+
+<3> Properly wait on our futures to complete
+
+== Controlling the flow of Future execution
+
+== Future.sequence and the functional "sequence" idiom.
+Most of this is standard Scala collections stuff, but what is +Future.sequence+? +Future.sequence+ is a +Future+ specific version of the "sequence" functional idiom (not to be confused with the Scala collection type +Sequence+). There is much more to know about "sequence", but it is basically a way to invert the nesting of two monads, i.e. +G[F[\_]]+ to +F[G[_]]+ (given certain properties of types G and F). Unfortunately, standard Scala requires some compiler magic<<sources,^3^>> to generically implement sequence. Without resorting to this magic, one must simply repeatedly copy the pattern of sequence for different monad types, such as has been done for +Future.sequence+.
+
++Future.sequence+ also takes care of waiting for all of our futures to complete. In this example, result is of type +Future[List[String]]+, which is completed once all of our futures complete
+
+== Problems with Pattern #1
+Pattern #1 solves the problem of regulating the flow "hot" futures, but there is a problem here. In Pattern #1, 
+
+[[sources]]
+== Sources
+1. http://docs.scala-lang.org/overviews/core/futures.html
+2. https://github.com/scalaz/scalaz
+3. http://stackoverflow.com/questions/8736164/what-are-type-lambdas-in-scala-and-what-are-their-benefits
+4. http://stackoverflow.com/questions/6750609/list-of-options-equivalent-of-sequence-in-scala
