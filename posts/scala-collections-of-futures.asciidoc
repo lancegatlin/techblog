@@ -67,9 +67,9 @@ So what can I do?  I need to stop assigning +Future+ to +Unit+. I can do this by
 ----
 val futResult : Future[List[Unit]] = 
   Future.sequence { 
-    someInts.map(svc.doSomething _) // <1>
-  } // <2>
-val result : Unit = Await.result(futResult,Duration.Inf) // <3>
+    someInts.map(svc.doSomething _) // # <1>
+  } // # <2>
+val result : Unit = Await.result(futResult,Duration.Inf) // # <3>
 ----
 <1> Use +map+ instead of +foreach+ to ensure I don't discard any futures
 <2> Use +Future.sequence+ to convert a +List[Future[Unit]]+ to +Future[List[Unit]]+
@@ -92,16 +92,16 @@ I've solved the problem of discarding futures, but I still need to somehow regul
 ----
 val result : Unit = 
     someInts
-      .grouped(3) // <1>
+      .grouped(3) // # <1>
       .toList
       .map { group => 
-        val innerFutResult : Future[List[Unit]] = // <2>
+        val innerFutResult : Future[List[Unit]] = // # <2>
           Future.sequence {
             group.map(svc.doSomething _)      
           }
-        Await.result(innerFutResult, Duration.Inf) // <3>
+        Await.result(innerFutResult, Duration.Inf) // # <3>
       }
-      .flatten // <4>
+      .flatten // # <4>
 ----
 <1> Group someInts into a group size that I want to execute simulatenously
 <2> For each group create a +Future[List[Unit]]+
@@ -122,13 +122,13 @@ val futResult : Future[List[Unit]] =
     someInts
       .grouped(3)
       .toList
-      .foldLeft(Future.successful(List[Unit]())) { (futAccumulator,group) => // <1>
-        futAccumulator.flatMap { accumulator => // <2>
+      .foldLeft(Future.successful(List[Unit]())) { (futAccumulator,group) => // # <1>
+        futAccumulator.flatMap { accumulator => // # <2>
           val futInnerResult : Future[List[Unit]] =
             Future.sequence {
               group.map(svc.doSomething _)      
             }
-          futInnerResult.map(innerResult => accumulator ::: innerResult) // <3>
+          futInnerResult.map(innerResult => accumulator ::: innerResult) // # <3>
         }
       }
 val result : Unit = Await.result(futResult,Duration.Inf)
@@ -163,13 +163,13 @@ val futResult : Future[List[Unit]] =
       .grouped(3)
       .toList
       .foldLeft(Future.successful(List[Unit]())) { (futAccumulator,group) =>
-        for { // <1>
+        for { // # <1>
           accumulator <- futAccumulator
-          innerResult <- group.map(svc.doSomething _).sequence // <2>
+          innerResult <- group.map(svc.doSomething _).sequence // # <2>
         } yield accumulator ::: innerResult
       }
 
-val result : Unit = futResult.get // <3>
+val result : Unit = futResult.get // # <3>
 ----
 <1> Replaced +Future.flatMap+ and nested +Future.map+ with a much cleaner more readable for-comprehension<<sources,^7^>>
 <2> Replaced +Future.sequence+ with sugar method
