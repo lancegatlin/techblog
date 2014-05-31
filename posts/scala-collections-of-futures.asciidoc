@@ -190,7 +190,7 @@ I'm going to further cleanup Pattern 1.1 by capturing the generic code pattern h
       cbf2: CanBuildFrom[Nothing, B, M[B]],
       ec: ExecutionContext) : Future[M[B]] = {
       self
-       .toList // <1>
+       .toList // # <1>
        .grouped(groupSize)
        .foldLeft(Future.successful(List[B]())) { (futAccumulator,group) =>
          for {
@@ -198,7 +198,7 @@ I'm going to further cleanup Pattern 1.1 by capturing the generic code pattern h
            innerResult <- group.map(f).sequence
          } yield accumulator ::: innerResult
        }
-       .map(_.to[M]) // <2>
+       .map(_.to[M]) // # <2>
     }
   }
 ----
