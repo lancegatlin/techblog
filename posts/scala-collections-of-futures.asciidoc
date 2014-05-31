@@ -178,7 +178,7 @@ val result : Unit = futResult.get // # <3>
 I like the OOP style call convention, but this pattern is still tedious. Perhaps, I can make this even simpler?
 
 == Pimp My Future: Pattern 1.2
-I'm going to further cleanup Pattern 1.1 by capturing the generic code pattern here into another method on the +Future_PimpMyTraversableOnceOfFutures+ class.
+I'm going to further cleanup Pattern 1.1 by creating another pimp-my-library method on a new value class +Future_PimpMyIterable+.
 
 .Listing 5
 [source,scala,numbered]
