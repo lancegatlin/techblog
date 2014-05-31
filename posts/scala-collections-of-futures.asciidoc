@@ -18,6 +18,8 @@ NOTE: The Scala/Akka standard library +Future+ is not lazy. Once a +Future+ is c
 I've tried to make sure all of the code examples here can be pasted directly into the Scala console. Some boilerplate is required to make these work:
 [source,scala,numbered]
 ----
+import scala.language.higherKinds
+import scala.collection.generic._
 import scala.concurrent._
 import scala.concurrent.duration._
 import ExecutionContext.Implicits.global
@@ -67,13 +69,11 @@ val futResult : Future[List[Unit]] =
   Future.sequence { 
     someInts.map(svc.doSomething _) // <1>
   } // <2>
-val listResult : List[Unit] = Await.result(futResult,Duration.Inf) // <3>
-val result : Unit = listResult // <4>
+val result : Unit = Await.result(futResult,Duration.Inf) // <3>
 ----
 <1> Use +map+ instead of +foreach+ to ensure I don't discard any futures
 <2> Use +Future.sequence+ to convert a +List[Future[Unit]]+ to +Future[List[Unit]]+
-<3> Properly wait on all my futures to complete
-<4> Now that I've waited on all my futures, I can safely discard my +List[Unit]+ because no exceptions were thrown
+<3> Properly wait on all my futures to complete. Also, now that I've waited on all my futures, I can safely discard my +List[Unit]+ because no exceptions were thrown
 
 If any exceptions are thrown during +svc.doSomething+ calls, the exception will percolate up through +Await.result+. But how can I stop dumping all futures into the executor at once?
 
@@ -90,7 +90,7 @@ I've solved the problem of discarding futures, but I still need to somehow regul
 .Listing 4
 [source,scala,numbered]
 ----
-val listResult : List[Unit] = 
+val result : Unit = 
     someInts
       .grouped(3) // <1>
       .toList
@@ -102,12 +102,11 @@ val listResult : List[Unit] =
         Await.result(innerFutResult, Duration.Inf) // <3>
       }
       .flatten // <4>
-val result : Unit = listResult
 ----
 <1> Group someInts into a group size that I want to execute simulatenously
 <2> For each group create a +Future[List[Unit]]+
 <3> Use +Await.result+ inside the map to wait for each group to complete
-<4> Because I divided someInts into groups, I need to flatten the results (Note: this isn't strictly necessary for +Unit+ here as we are going to discard +List[Unit]+ anyway, but it would be necessary for return-types other than +Unit+)
+<4> Because I divided someInts into groups, I need to +flatten+ the results (Note: this isn't strictly necessary since result is +Unit+ in this example. I'm going to discard +List[Unit]+ anyway, but if result wasn't +Unit+ it would be necessary to +flatten+)
 
 Ok this works. I've ensured that no more than N +svc.doSomething+ calls are happening at once and exceptions are never discarded. However, this pattern has a fatal flaw. It does not pass a future back as a result. For the purposes of writing example code, this kind of thing gets the job done. However, when writing code that will live in an asyncronous eco-system, I must make my result a +Future+.
 
@@ -123,7 +122,7 @@ val futResult : Future[List[Unit]] =
     someInts
       .grouped(3)
       .toList
-      .foldLeft(Future.successful(List[Unit])) { (futAccumulator,group) => // <1>
+      .foldLeft(Future.successful(List[Unit]())) { (futAccumulator,group) => // <1>
         futAccumulator.flatMap { accumulator => // <2>
           val futInnerResult : Future[List[Unit]] =
             Future.sequence {
@@ -132,13 +131,11 @@ val futResult : Future[List[Unit]] =
           futInnerResult.map(innerResult => accumulator ::: innerResult) // <3>
         }
       }
-      .map(_.flatten) // <4>
 val result : Unit = Await.result(futResult,Duration.Inf)
 ----
-<1> I've replaced +map+ with +foldLeft+. This will ensure that each group is processed one at a time, from left to right and will accumulate the +Future[List[Unit]]+ result after each group completes
+<1> I've replaced +map+ with +foldLeft+. This will ensure that each group is processed one at a time, from left to right and will accumulate the +Future[List[Unit]]+ result after each group completes. The accumulator is initialized with already completed +Future+ of an empty +List[Unit]+.
 <2> +Future.flatMap+ is used here instead of +Future.map+ to flatten the inner return type of +Future[List[Unit]]+ over the entire collection (If +Future.map+ had been used, it would return +Future[Future[List[Unit]]]+).
 <3> After a group completes, the result accumulates
-<4> Finally, flatten +Future[List[List[Unit]]+ to +Future[List[Unit]]+
 
 Ok this is much better. I'm ensuring that I don't discard exceptions, I control the flow of futures AND now I return a Future to callers. But I call a +Future+ returning method N times in many places. This is a pretty tedious pattern to have to repeat everywhere. Scala gives me some amazing utilities for cleaning up complexity like this.
 
@@ -161,17 +158,16 @@ I'm going to cleanup Pattern 1.0 using a for-comprehension<<sources,^7^>> and th
 .Pattern 1.1
 [source,scala,numbered]
 ----
-val futResult : Future[Unit] = 
+val futResult : Future[List[Unit]] = 
     someInts
       .grouped(3)
       .toList
-      .foldLeft(Future.successful(List[Unit])) { (futAccumulator,group) =>
+      .foldLeft(Future.successful(List[Unit]())) { (futAccumulator,group) =>
         for { // <1>
           accumulator <- futAccumulator
           innerResult <- group.map(svc.doSomething _).sequence // <2>
-        } yield accumulator ::: result
+        } yield accumulator ::: innerResult
       }
-      .map(_.flatten)
 
 val result : Unit = futResult.get // <3>
 ----
@@ -187,33 +183,32 @@ I'm going to further cleanup Pattern 1.1 by capturing the generic code pattern h
 .Listing 5
 [source,scala,numbered]
 ----
-  implicit class Future_PimpMyFuture[T](val self: Future[T]) extends AnyVal {
-    def get : T = Await.result(self, Duration.Inf)
-  }
-  implicit class Future_PimpMyTraversableOnceOfFutures[A, M[AA] <: TraversableOnce[AA]](val self: M[Future[A]]) extends AnyVal {
-    /**
-     * @param groupSize maximum number of futures to submit to executor at same time
-     * @return a Future of M[A] completes once all futures have completed. Futures are submitted to executor in groupSize chunks. */
-    def sequence(implicit cbf: CanBuildFrom[M[Future[A]], A, M[A]], ec: ExecutionContext) : Future[M[A]] =
-      Future.sequence(self)
+  implicit class Future_PimpMyIterable[A, M[AA] <: Iterable[AA]](val self: M[A]) extends AnyVal {
     /** @return a Future of M[B] that completes once all futures have completed */
-    def mapAsync[B](groupSize: Int)(f: A => Future[B])(implicit cbf: CanBuildFrom[M[Future[A]], A, M[A]], ec: ExecutionContext) : Future[M[B]] = {
+    def mapAsync[B](groupSize: Int)(f: A => Future[B])(implicit
+      cbf: CanBuildFrom[M[Future[A]], A, M[A]],
+      cbf2: CanBuildFrom[Nothing, B, M[B]],
+      ec: ExecutionContext) : Future[M[B]] = {
       self
-       .foldLeft(Future.successful(List[Unit])) { (futAccumulator,group) =>
-         for { // <1>
+       .toList // <1>
+       .grouped(groupSize)
+       .foldLeft(Future.successful(List[B]())) { (futAccumulator,group) =>
+         for {
            accumulator <- futAccumulator
-           innerResult <- group.map(svc.doSomething _).sequence
-         } yield accumulator ::: result
+           innerResult <- group.map(f).sequence
+         } yield accumulator ::: innerResult
        }
-       .map(_.flatten)    
+       .map(_.to[M]) // <2>
+    }
   }
 ----
+<1> Using list here for efficient accumulation of results
+<2> Convert back to desired collection
 
 .Pattern 1.2
 [source,scala,numbered]
 ----
-val futResult : Future[Unit] = 
-    someInts.mapAsync(3)(svc.doSomething _)
+val futResult : Future[List[Unit]] = someInts.mapAsync(3)(svc.doSomething _)
 val result : Unit = futResult.get
 ----
 
