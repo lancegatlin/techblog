@@ -1,0 +1,45 @@
+SBT: Standard build.sbt for Scala
+=================================
+Lance Gatlin <lance.gatlin@gmail.com>
+v1,7-Jun-2014
+:blogpost-status: unpublished
+:blogpost-categories: sbt,scala
+
+== Version
+* Scala 2.11.0
+
+A basic build.sbt template:
+ 
+NOTE: replace XXX below
+
+[source,sbt,numbered]
+----
+scalaVersion := "2.11.0"
+
+organization := "org.XXX.XXX"
+
+name := "XXX"
+
+version := "1.0-SNAPSHOT"
+
+scalacOptions ++= Seq("-feature","-unchecked", "-deprecation")
+
+libraryDependencies += "org.scalatest" % "scalatest_2.11" % "2.2.0" % "test"
+----
+
+Example:
+
+[source,sbt,numbered]
+----
+scalaVersion := "2.11.0"
+
+organization := "org.lancegatlin"
+
+name := "myproject"
+
+version := "1.0-SNAPSHOT"
+
+scalacOptions ++= Seq("-feature","-unchecked", "-deprecation")
+
+libraryDependencies += "org.scalatest" % "scalatest_2.11" % "2.2.0" % "test"
+----
