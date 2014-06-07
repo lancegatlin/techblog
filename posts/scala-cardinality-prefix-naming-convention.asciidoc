@@ -1,0 +1,161 @@
+Scala: Cardinality prefix naming convention
+===========================================
+Lance Gatlin <lance.gatlin@gmail.com>
+v1,7-Jun-2014
+:blogpost-status: unpublished
+:blogpost-categories: scala
+
+== Naming +Option+ variables
+Many times while writing Scala, I find myself having to look up the type of a variable that I'm working with. Often it is because I'm unsure whether the variable is an +Option+. This means having to depend on my IDE shortcut to show me the type or having to navigate to the source file.
+[source,scala,numbered]
+----
+val hotel : Hotel = ???
+val stateCode = hotel.stateCode // <1>
+----
+1. Is stateCode an +Option+?
+
+Other times, I'm transforming a given +Option+ variable into its base type and I'm forced to make up an awkward name for inner name of the value contained in the +Option+:
+[source,scala,numbered]
+----
+def getRawPhoneNumber(...) : Option[String] = ???
+
+def doSomething(s: String) : Future[Unit] = ???
+
+val phoneNumber = svc.getRawPhoneNumber(...)
+phoneNumber match {
+  case Some(gotAPhoneNumber) => doSomething(gotAPhoneNumber) // <1>
+  case None => Future.succcessful(())
+}
+----
+1. Ugly! What to name this value?!?
+
+While this example is trivial, it gets complicated fast once you have 15 or so fields to deal with at once:
+[source,scala,numbered]
+----
+case class Hotel(
+  id: Int,
+  chainCode: Option[String],
+  name: String,
+  addressProvider: AddressProviderEnum,
+  addressLine1: String,
+  addressLine2: Option[String],
+  city: String,
+  stateCode: Option[String],
+  postalCode: Option[String],
+  countryCode: String,
+  phoneNumber: String,
+  location: PlaceGeocode,
+  providerMapping: Set[ProviderHotelId],
+  propertyType: PropertyTypeEnum
+)
+----
+1. Without having to flip back to this source file, I don't know which fields are +Option+!
+
+I've started using a super-simple naming convention that explicitly declares the cardinality of the variable to both avoid the naming problem and to increase readability of the code. For +Option+, I simply add the prefix "opt" to the +Option+ variable:
+
+[source,scala,numbered]
+----
+val optPhoneNumber = svc.getRawPhoneNumber(...)
+
+optPhoneNumber match {
+  case Some(phoneNumber) => doSomething(phoneNumber) // <1>
+  case None => Future.succcessful(())
+}
+----
+1. Ahhhh so much better. I know +optPhoneNumber+ is an +Option+ AND I have an obvious (and highly readable) name for the inner variable.
+
+== Naming collection variables
+
+There is also another problem that I encounter when naming things: what the heck do I name collection variables? For plural words in English, the convention is mostly to just append 's'. And this mostly works:
+
+[source,scala,numbered]
+----
+val hotels : Vector[Hotel] = ???
+val names : Vector[String] = ???
+val phoneNumbers : Vector[String] = ???
+val amenities : Vector[String] = ??? // <1>
+val amenitys : Vector[String] = ??? // <2>
+----
+1. Ack. Ugly!!
+2. Ugly and people think I don't know basic English grammar
+
+Also, there is a more serious problem here. If I have a collection of things that has at least one element, it is always safe to call +head+. This condition can often be guaranteed at compile time, but how would anyone know? This leaves me with the same problem I had with +null+ in Java: I must either defensively test everywhere for the condition OR I must depend on it being in the documentation.
+
+[source,scala,numbered]
+----
+val hotels : Vector[Hotel] = ???
+
+val unsafeFirst = hotels.head // <1>
+val optSafeFirst = hotels.size match { // <2>
+  case 0 => None
+  case _ => Some(hotels.head)
+} 
+----
+1. Maybe this is wrong? Hopefully, documentation guarantees that hotels is non-empty.
+2. Or I can be safe about this. But now I have an +Option+ and my code grows ever more complex (for possibly no good reason if +hotels+ is guaranteed to have at least one item).
+
+In code I write now, I fix both of these problems by keeping the variable name in the English singular,  and prefixing a plural variable prefix to the variable name:
+
+1. "zom": Read as "zero or more"
+2. "oom": Read as "one or more"
+3. "all": Read as "all of them" (Most likely a very large collection, but technically equivalent to "zom")
+
+.Example:
+[source,scala,numbered]
+----
+val amenities : Vector[String] = ??? // <1>
+
+val zomAmenity : Vector[String] = ??? // <2>
+
+val oomAmenity : Vector[String] = ??? // <3>
+val amenity = oomAmenity.head
+
+val allAmenity : Vector[String] = ??? // <4>
+
+allAmenity.foreach { amenity => // <5>
+  ...
+}
+----
+1. Ugly. Also is +head+ safe?
+2. I know +head+ is not safe here
+3. I know there is at least one amenity. +head+ is safe.
+4. I know there should be at least one amenity. +head+ is probably safe.
+5. Bonus! Like +Option+ above, I have an easy and readable decision for what to name the inner function parameter.
+
+== Cardinality Prefix naming convention
+Here is the full listing of the cardinality prefix naming convention:
+
+1. Name all variables in the English singular form
+** Ex: hotel, phoneNumber, amenity
+2. If the variable is an option, prefix with "opt"
+** Ex: optHotel, optPhoneNumber, optAmenity
+3. If the variable is a collection AND guarantees at least one member, prefix with "oom" 
+** Ex: oomHotel, oomPhoneNumber, oomAmenity
+4. If the variable is a collection AND does not guarantee at least one member, prefix with "zom"
+** Ex: zomHotel, zomPhoneNumber, zomAmenity
+5. If the variable is a collection of all of the values (very large collection), prefix with "all"
+** Ex: allHotel, allPhoneNumber, allAmenity
+
+== Example
+The large case class from above, after applying the naming convention:
+[source,scala,numbered]
+----
+case class Hotel(
+  id: Int,
+  optChainCode: Option[String],
+  name: String,
+  addressProvider: AddressProviderEnum,
+  addressLine1: String,
+  optAddressLine2: Option[String],
+  city: String,
+  optStateCode: Option[String], // <1>
+  optPostalCode: Option[String],
+  countryCode: String,
+  phoneNumber: String,
+  location: PlaceGeocode,
+  oomProviderMapping: Set[ProviderHotelId], // <2>
+  propertyType: PropertyTypeEnum
+)
+----
+1. I don't need to read the source to know +optStateCode+ is an +Option+
+2. I know +oomProviderMapping+ has at least one item and that +head+ is safe to call

@@ -1,0 +1,70 @@
+MongoDB: Get a random record
+============================
+Lance Gatlin <lance.gatlin@gmail.com>
+v1,7-Jun-2014
+:blogpost-status: unpublished
+:blogpost-categories: mongodb
+
+== Get a random record in Mongo
+A quick and simple function that picks a random record from a cursor:
+
+[source,javascript,numbered]
+var getRnd = function(q) { 
+  var count = q.count()
+  var o = q.limit(-1).skip(Math.random() * q.count()).next()
+  printjson(o)
+}
+
+Example:
+----
+> var getRnd = function(q) { 
+...   var count = q.count()
+...   var o = q.limit(-1).skip(Math.random() * q.count()).next()
+...   printjson(o)
+... }
+> use hotel
+switched to db hotel
+> getRnd(db.hotelWithDetail.find())
+{
+	"_id" : ObjectId("538f5fa6d9805dc69ea218b5"),
+	"hotel" : {
+		"id" : 88173,
+		"name" : "Pantai Inn",
+		"addressProvider" : "GoogleMaps",
+		"addressLine1" : "1003 Coast Boulevard",
+		"city" : "San Diego",
+		"countryCode" : "US",
+		"phoneNumber" : "+1-858-224-7600",
+		"location" : {
+			"latitude" : 32.8485673,
+			"longitude" : -117.275847,
+			"geocodeProvider" : "GoogleMaps",
+			"geocodeAccuracy" : "Vicinity",
+			"created" : ISODate("2014-04-19T17:48:45.101Z")
+		},
+		"oomProviderMapping" : [
+			{
+				"provider" : "TP",
+				"providerId" : "71990"
+			},
+			{
+				"provider" : "GIA",
+				"providerId" : "250629"
+			}
+		],
+		"propertyType" : "Unknown",
+		"optPostalCode" : "92037",
+		"optStateCode" : "CA",
+		"optChainCode" : "WV"
+	},
+	"hotelDetail" : {
+		"id" : 88173,
+		"description" : "The Pantai Inn is a Balinesian inspired hotel perched atop La Jollas jagged cliffs. Boutique-lined streets gemmed with art gifts and other shopping destinations. Indulgent soft sand beaches with year-round vacation sunshine and the Pacific Oceans watercolor sunsets. From the village to the cove La Jolla truly is the jewel of Southern California. - 11 ROOMS - 2 LEVELS - INTERIOR CORRIDORS",
+		"zomProviderOomAmenity" : [ ],
+		"optTpCityCode" : "SAN",
+		"optCheckInTime" : "1500"
+	}
+}
+----
+
+
