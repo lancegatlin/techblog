@@ -1,0 +1,97 @@
+IntelliJ IDEA: Configure for Scala and SBT
+==========================================
+Lance Gatlin <lance.gatlin@gmail.com>
+v1,8-Jun-2014
+:imagesdir: intellij_idea-configure-for-scala-and-sbt/
+:blogpost-status: unpublished
+:blogpost-categories: intellij_idea,scala,sbt
+
+== Versions
+1. CentOS 6.3
+2. Oracle Java JDK 1.6
+3. Scala 2.10.1
+4. SBT 0.12
+5. IntelliJ IDEA Community 12.0.4
+
+== Prerequisites
+1. link:centos-6-install-intellij-idea.asciidoc[CentOS 6: Install IntelliJ IDEA]
+
+== Install Plugins
+Add the SBT and Scala language plug-ins:
+1. Click +Configure+:
++
+image::intellij_idea_configure.png[]
++
+2. Click +Plugins+:
++
+image::intellij_idea_plugins.png[]
++
+3. Click +Browse repositories+:
++
+image::intellij_idea_browse_repositories.png[]
++
+4. Click the search box and enter "scala":
++
+image::intellij_idea_plugin_search_box.png[]
++
+5. Select both SBT and Scala Language plugins by shift-left clicking on them
+6. Right click on one of the plugins and select 'Download and Install'
++
+image::intellij_idea_download_and_install.png[]
++
+7. Click 'Install' then 'Close' the 'Ok' and restart IntelliJ IDEA
+
+== Try out SBT Console
+1. After IntelliJ IDEA restarts, either load an existing Scala project or create an empty Scala project
+2. Click on SBT console in lower left corner:
++
+image::intellij_idea_sbt_console.png[]
++
+3. Click on the 'play' icon:
++
+image::intellij_idea_sbt_play.png[]
++
+4. IntelliJ will download SBT and Scala jars then display the SBT command-line:
++
+image::intellij_idea_sbt_command-line.png[]
+
+== Configure sbt gen-idea command
+1. Make directories if missing:
++
+[sudo,sh,numbered]
+----
+mkdir ~/.sbt/plugins
+----
++
+2. Add the SBT plugin for generating IntelliJ IDEA project files. Edit ~/.sbt/plugins/build.sbt:
++
+----
+resolvers += "Sonatype snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
+
+addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "1.2.0-SNAPSHOT")
+----
++
+3. Load ~/.sbt/plugins/build.sbt
+Enter at IntelliJ SBT console:
++
+----
+> reload
+[info] downloading http://oss.sonatype.org/content/repositories/snapshots/com/github/mpeltonen/sbt-idea_2.9.2_0.12/1.2.0-SNAPSHOT/sbt-idea-1.2.0-SNAPSHOT.jar ...
+[info] 	[SUCCESSFUL ] com.github.mpeltonen#sbt-idea;1.2.0-SNAPSHOT!sbt-idea.jar (1309ms)
+[info] downloading http://repo1.maven.org/maven2/commons-io/commons-io/2.0.1/commons-io-2.0.1.jar ...
+[info] 	[SUCCESSFUL ] commons-io#commons-io;2.0.1!commons-io.jar (184ms)
+[info] Done updating.
+[info] Set current project to scala.statemachine (in build file:/home/XXXXXX/Code/smach/)
+----
++
+4. Use any existing build.sbt or create a blank build.sbt (see link:sbt-standard-build.sbt-for-scala.asciidoc[SBT: Standard build.sbt for Scala] then invoke at SBT console:
++
+----
+> gen-idea
+----
++
+5. After downloads complete and generation is complete, click 'ok' and IntelliJ will restart
++
+NOTE: the SBT plugin will automatically download the appropriate Scala compiler version. This is a separate instance from any instance of the Scala compiler you may have installed already.
+
+
