@@ -4,7 +4,7 @@ Lance Gatlin <lance.gatlin@gmail.com>
 v1,8-Jun-2014
 :imagesdir: centos-6-install-intellij-idea/
 :blogpost-status: unpublished
-:blogpost-categories: centos6
+:blogpost-categories: centos6,intellij_idea
 
 == Versions
 1. CentOS 6.5
