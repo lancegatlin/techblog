@@ -64,7 +64,7 @@ image::intellij_idea_sbt_command-line.png[]
 mkdir ~/.sbt/plugins
 ----
 +
-2. Add the SBT plugin for generating IntelliJ IDEA project files. Edit ~/.sbt/plugins/build.sbt:
+2. Add the SBT plugin for generating IntelliJ IDEA project files (for the current user), edit ~/.sbt/plugins/build.sbt:
 +
 ----
 resolvers += "Sonatype snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
@@ -85,13 +85,13 @@ Enter at IntelliJ SBT console:
 [info] Set current project to scala.statemachine (in build file:/home/XXXXXX/Code/smach/)
 ----
 +
-4. Use any existing build.sbt or create a blank build.sbt (see link:sbt-standard-build.sbt-for-scala.asciidoc[SBT: Standard build.sbt for Scala] then invoke at SBT console:
+4. Use any existing build.sbt or create a blank build.sbt (see link:sbt-standard-build.sbt-for-scala.asciidoc[SBT: Standard build.sbt for Scala]) then invoke at SBT console:
 +
 ----
 > gen-idea
 ----
 +
-5. After downloads complete and generation is complete, click 'ok' and IntelliJ will restart
+5. After downloads complete and generation is complete, click 'Ok' and IntelliJ will restart
 +
 NOTE: the SBT plugin will automatically download the appropriate Scala compiler version. This is a separate instance from any instance of the Scala compiler you may have installed already.
 
