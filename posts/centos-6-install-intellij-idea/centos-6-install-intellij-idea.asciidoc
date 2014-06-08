@@ -1,0 +1,42 @@
+CentOS 6: Install IntelliJ IDEA
+============================
+Lance Gatlin <lance.gatlin@gmail.com>
+v1,7-Jun-2014
+:blogpost-status: unpublished
+:blogpost-categories: centos6
+
+== Versions
+1. CentOS 6.5
+2. Oracle Java JDK 1.7
+3. IntelliJ IDEA Community 13.0.1
+
+== Prerequisties
+
+1. link:centos-6-install-oracle-jdk[CentOS 6: Install Oracle JDK]
+2. link:centos-6-set-java_home[CentOS 6: Set JAVA_HOME]
+
+== Install
+Download latest version of IntelliJ IDEA, extract and put in /usr/lib (file names vary with version number):
+[source,sh,numbered]
+----
+wget http://download.jetbrains.com/idea/ideaIC-13.0.1.tar.gz
+tar xvf ideaIC-13.0.1.tar.gz
+sudo mv idea-IC-133.331 /usr/lib
+sudo ln -s /usr/lib/idea-IC-133.331 /usr/lib/idea
+----
+
+== Configure
+Add to /usr/bin
+
+[source,sh,numbered]
+sudo ln -s /usr/lib/idea/bin/idea.sh /usr/bin/idea 
+
+== Verify
+Start it up:
+----
+$ idea
+----
+
+image::intellij-idea-complete-installation.png[]
+
+image::intellij-idea-welcome.png[]

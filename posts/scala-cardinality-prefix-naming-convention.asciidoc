@@ -14,7 +14,7 @@ val stateCode = hotel.stateCode // <1>
 ----
 1. Is stateCode an +Option+?
 
-Other times, I'm transforming a given +Option+ variable into its base type and I'm forced to make up an awkward name for inner name of the value contained in the +Option+:
+Other times, I'm transforming a given +Option+ variable into its base type and I'm forced to make up an awkward name for the inner name of the value contained in the +Option+:
 [source,scala,numbered]
 ----
 def getRawPhoneNumber(...) : Option[String] = ???
@@ -73,13 +73,18 @@ There is also another problem that I encounter when naming things: what the heck
 val hotels : Vector[Hotel] = ???
 val names : Vector[String] = ???
 val phoneNumbers : Vector[String] = ???
+----
+
+Except when it doesn't work:
+[source,scala,numbered]
+----
 val amenities : Vector[String] = ??? // <1>
 val amenitys : Vector[String] = ??? // <2>
 ----
 1. Ack. Ugly!!
-2. Ugly and people think I don't know basic English grammar
+2. Ugly and people think I don't know basic English grammar. They won't understand my need for regularity.
 
-Also, there is a more serious problem here. If I have a collection of things that has at least one element, it is always safe to call +head+. This condition can often be guaranteed at compile time, but how would anyone know? This leaves me with the same problem I had with +null+ in Java: I must either defensively test everywhere for the condition OR I must depend on it being in the documentation.
+Also, there is a more serious problem here. If a collection has at least one item, it is always safe to call +head+. This condition can often be guaranteed at compile time, but how would anyone know? This leaves me with the same problem I had with +null+ in Java: I must either defensively test everywhere for the condition OR I must depend on it being in the documentation.
 
 [source,scala,numbered]
 ----
@@ -119,7 +124,7 @@ allAmenity.foreach { amenity => // <5>
 1. Ugly. Also is +head+ safe?
 2. I know +head+ is not safe here
 3. I know there is at least one amenity. +head+ is safe.
-4. I know there should be at least one amenity. +head+ is probably safe.
+4. I know there should be at least one amenity. +head+ is probably safe. More importantly I should avoid excessive transforms on the collection, all those copies will take up a lot of memory!
 5. Bonus! Like +Option+ above, I have an easy and readable decision for what to name the inner function parameter.
 
 == Cardinality Prefix naming convention
