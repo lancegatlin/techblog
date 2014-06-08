@@ -19,15 +19,15 @@ v1,8-Jun-2014
 == Install Plugins
 Add the SBT and Scala language plug-ins:
 
-1.  Click +Configure+:
+1.  Click 'Configure':
 +
 image::intellij_idea_configure.png[]
 +
-2. Click +Plugins+:
+2. Click 'Plugins':
 +
 image::intellij_idea_plugins.png[]
 +
-3. Click +Browse repositories+:
+3. Click 'Browse repositories':
 +
 image::intellij_idea_browse_repositories.png[]
 +
@@ -40,7 +40,7 @@ image::intellij_idea_plugin_search_box.png[]
 +
 image::intellij_idea_download_and_install.png[]
 +
-7. Click 'Install' then 'Close' the 'Ok' and restart IntelliJ IDEA
+7. Click 'Install' then 'Close' then 'Ok' and restart IntelliJ IDEA
 
 == Try out SBT Console
 1. After IntelliJ IDEA restarts, either load an existing Scala project or create an empty Scala project
@@ -56,15 +56,15 @@ image::intellij_idea_sbt_play.png[]
 +
 image::intellij_idea_sbt_command-line.png[]
 
-== Configure sbt gen-idea command
+== Configure SBT gen-idea command for the current user
 1. Make directories if missing:
 +
-[sudo,sh,numbered]
+[source,sh,numbered]
 ----
 mkdir ~/.sbt/plugins
 ----
 +
-2. Add the SBT plugin for generating IntelliJ IDEA project files (for the current user), edit ~/.sbt/plugins/build.sbt:
+2. Add the SBT plugin for generating IntelliJ IDEA project files, edit ~/.sbt/plugins/build.sbt:
 +
 ----
 resolvers += "Sonatype snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
@@ -72,8 +72,7 @@ resolvers += "Sonatype snapshots" at "http://oss.sonatype.org/content/repositori
 addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "1.2.0-SNAPSHOT")
 ----
 +
-3. Load ~/.sbt/plugins/build.sbt
-Enter at IntelliJ SBT console:
+3. Load ~/.sbt/plugins/build.sbt, by entering 'reload' in the SBT console:
 +
 ----
 > reload
@@ -85,7 +84,7 @@ Enter at IntelliJ SBT console:
 [info] Set current project to scala.statemachine (in build file:/home/XXXXXX/Code/smach/)
 ----
 +
-4. Use any existing build.sbt or create a blank build.sbt (see link:sbt-standard-build.sbt-for-scala.asciidoc[SBT: Standard build.sbt for Scala]) then invoke at SBT console:
+4. Use any existing build.sbt or create a blank build.sbt (see link:sbt-standard-build-sbt-for-scala.asciidoc[SBT: Standard build.sbt for Scala]) then invoke at SBT console:
 +
 ----
 > gen-idea
