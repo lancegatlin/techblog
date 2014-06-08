@@ -18,7 +18,8 @@ v1,8-Jun-2014
 
 == Install Plugins
 Add the SBT and Scala language plug-ins:
-1. Click +Configure+:
+
+1.  Click +Configure+:
 +
 image::intellij_idea_configure.png[]
 +
