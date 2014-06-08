@@ -3,7 +3,7 @@ CentOS 6.5: Virtualbox Guest Additions
 Lance Gatlin <lance.gatlin@gmail.com>
 v1,20-May-2014
 :blogpost-status: unpublished
-:blogpost-categories: git,centos6
+:blogpost-categories: centos6,virtualbox
 
 == Versions
 1. CentOS 6.5
