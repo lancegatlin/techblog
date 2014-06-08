@@ -1,7 +1,7 @@
 CentOS 6: Install IntelliJ IDEA
-============================
+===============================
 Lance Gatlin <lance.gatlin@gmail.com>
-v1,7-Jun-2014
+v1,8-Jun-2014
 :blogpost-status: unpublished
 :blogpost-categories: centos6
 
