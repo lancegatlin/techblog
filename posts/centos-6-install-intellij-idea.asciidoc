@@ -2,6 +2,7 @@ CentOS 6: Install IntelliJ IDEA
 ===============================
 Lance Gatlin <lance.gatlin@gmail.com>
 v1,8-Jun-2014
+:imagesdir: centos-6-install-intellij-idea/
 :blogpost-status: unpublished
 :blogpost-categories: centos6
 
@@ -11,7 +12,6 @@ v1,8-Jun-2014
 3. IntelliJ IDEA Community 13.0.1
 
 == Prerequisties
-
 1. link:centos-6-install-oracle-jdk[CentOS 6: Install Oracle JDK]
 2. link:centos-6-set-java_home[CentOS 6: Set JAVA_HOME]
 
@@ -26,8 +26,7 @@ sudo ln -s /usr/lib/idea-IC-133.331 /usr/lib/idea
 ----
 
 == Configure
-Add to /usr/bin
-
+Add to /usr/bin:
 [source,sh,numbered]
 sudo ln -s /usr/lib/idea/bin/idea.sh /usr/bin/idea 
 
