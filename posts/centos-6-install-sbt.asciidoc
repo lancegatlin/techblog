@@ -12,12 +12,12 @@ v1,28-May-2014
 
 == Install
 [source,sh,numbered]
-
-NOTE: sbt is now part of standard CentOS repos
+wget http://dl.bintray.com/sbt/rpm/sbt-0.13.5.rpm
+sudo yum localinstall sbt-0.13.5.rpm 
 
 == Test
 Invoke sbt to get version:
 ----
 $ sbt --verison
-sbt launcher version 0.13.1
+sbt launcher version 0.13.5
 ----
