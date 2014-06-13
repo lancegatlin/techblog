@@ -9,14 +9,14 @@ v1,8-Jun-2014
 == Versions
 1. CentOS 6.5 x86_64
 2. Oracle Java JDK 1.7
-3. IntelliJ IDEA Community 13.0.1
+3. IntelliJ IDEA Community 13.1.3
 
 == Prerequisties
 1. link:centos-6-install-oracle-jdk.asciidoc[CentOS 6: Install Oracle JDK]
 2. link:centos-6-set-java_home.asciidoc[CentOS 6: Set JAVA_HOME]
 
 == Install
-NOTE: replace $VERSION below with the latest version of IntelliJ IDEA. After extraction, replace $BUILD with the build number. 
+NOTE: replace $VERSION below with the latest version of IntelliJ IDEA. After extraction, replace $BUILD with the build number located on the directory named 'idea-IC-$BUILD'.
 
 Download latest version of IntelliJ IDEA, extract and put in /usr/lib (file names vary with version number):
 [source,sh,numbered]
