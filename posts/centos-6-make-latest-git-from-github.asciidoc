@@ -40,7 +40,7 @@ git version 1.7.1
 sudo mv /usr/bin/git /usr/bin/git_1710
 sudo mv ./git /usr/bin/git_1855
 sudo alternatives --install /usr/bin/git git /usr/bin/git/git_1710 1710
-sudo alternatives --install /usr/bin/git git /usr/bin/git/git_1710 1855
+sudo alternatives --install /usr/bin/git git /usr/bin/git/git_1855 1855
 
 == Test
 [source,sh,numbered]
