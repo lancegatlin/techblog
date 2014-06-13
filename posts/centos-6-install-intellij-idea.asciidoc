@@ -7,7 +7,7 @@ v1,8-Jun-2014
 :blogpost-categories: centos6,intellij_idea
 
 == Versions
-1. CentOS 6.5
+1. CentOS 6.5 x86_64
 2. Oracle Java JDK 1.7
 3. IntelliJ IDEA Community 13.0.1
 
@@ -16,19 +16,42 @@ v1,8-Jun-2014
 2. link:centos-6-set-java_home.asciidoc[CentOS 6: Set JAVA_HOME]
 
 == Install
+NOTE: replace $VERSION below with the latest version of IntelliJ IDEA. After extraction, replace $BUILD with the build number. 
+
 Download latest version of IntelliJ IDEA, extract and put in /usr/lib (file names vary with version number):
 [source,sh,numbered]
 ----
-wget http://download.jetbrains.com/idea/ideaIC-13.0.1.tar.gz
-tar xvf ideaIC-13.0.1.tar.gz
-sudo mv idea-IC-133.331 /usr/lib
-sudo ln -s /usr/lib/idea-IC-133.331 /usr/lib/idea
+wget http://download.jetbrains.com/idea/ideaIC-$VERSION.tar.gz
+tar xvf ideaIC-$VERSION.tar.gz
+sudo mv idea-IC-$BUILD /usr/lib
+sudo ln -sf /usr/lib/idea-IC-$BUILD /usr/lib/idea
+----
+
+.Example
+[source,sh,numbered]
+----
+wget http://download.jetbrains.com/idea/ideaIC-13.1.3.tar.gz
+tar xvf ideaIC-13.1.3.tar.gz
+sudo mv idea-IC-135.909 /usr/lib
+sudo ln -sf /usr/lib/idea-IC-135.909 /usr/lib/idea
 ----
 
 == Configure
 Add to /usr/bin:
 [source,sh,numbered]
-sudo ln -s /usr/lib/idea/bin/idea.sh /usr/bin/idea 
+sudo ln -sf /usr/lib/idea/bin/idea.sh /usr/bin/idea 
+
+Typically, I need more memory for the JVM that runs IntelliJ IDEA. Edit /usr/lib/idea/bin/idea.vmoptions and change the following lines:
+----
+...
+-Xms2048m
+-Xmx2048m
+-XX:MaxPermSize=512m
+-XX:ReservedCodeCacheSize=128m
+...
+----
+
+Repeat the same edits above for /usr/lib/idea/bin/idea64.vmoptions
 
 == Verify
 Start it up:

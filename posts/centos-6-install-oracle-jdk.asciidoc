@@ -26,7 +26,7 @@ sudo yum localinstall jdk-7u17-linux-x64.tar.gz
 +
 2. Add java as alternative for /usr/bin/java:
 +
-NOTE: Default priority of open-jdk 1.7 is 17000. Replace $PRIORITY below with a number higher than the default priority.
+NOTE: Default priority of open-jdk 1.7 is 170055. Replace $PRIORITY below with a number higher than the default priority.
 +
 [source,sh,numbered]
 sudo alternatives --install /usr/bin/java java /usr/java/latest/bin/java $PRIORITY
