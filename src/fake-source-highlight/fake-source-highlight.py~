@@ -8,7 +8,7 @@ def main(argv):
   lang=''
 
   try:
-    opts, args = getopt.getopt(argv,"f:s:",["line-number"])
+    opts, args = getopt.getopt(argv,"f:s:",["line-number="])
   except getopt.GetoptError:
     print 'source-highlight -f <ignored> -s <source language> --line-number <ignored>'
     sys.exit(2)

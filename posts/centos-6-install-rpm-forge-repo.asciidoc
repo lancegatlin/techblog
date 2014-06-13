@@ -6,27 +6,28 @@ v1,28-May-2014
 :blogpost-categories: centos
 
 == Versions
-1. CentOS 6.5
+1. CentOS 6.5 x86_64
 
 == Install
 
-NOTE: replace $MAJOR and $MINOR with the desired major and minor release. as of this writing it is 6 & 8
+NOTE: replace $VERSION with latest release. As of this writing it is 0.5.3-1
 
 [source,sh,numbered]
-wget http://dl.fedoraproject.org/pub/epel/$MAJOR/x86_64/epel-release-$MAJOR-$MINOR.noarch.rpm
-sudo rpm -Uvh epel-release-$MAJOR-$MINOR.noarch.rpm
+wget http://pkgs.repoforge.org/rpmforge-release/rpmforge-release-$VERSION.el6.rf.x86_64.rpm
+sudo yum localinstall rpmforge-release-$VERSION.el6.rf.x86_64.rpm
 
 .Example
 [source,sh,numbered]
-wget http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
-sudo rpm -Uvh epel-release-6-8.noarch.rpm
+wget http://pkgs.repoforge.org/rpmforge-release/rpmforge-release-0.5.3-1.el6.rf.x86_64.rpm
+sudo yum localinstall rpmforge-release-0.5.3-1.el6.rf.x86_64.rpm
 
-To discover latest major/minor, visit: http://dl.fedoraproject.org/pub/epel
+To discover latest major/minor, visit: http://http://pkgs.repoforge.org/rpmforge-release/
 
 == Verify
 ----
 $ head /etc/yum.repos.d/epel.repo
-[epel]
-name=Extra Packages for Enterprise Linux 6 - $basearch
-...
+### Name: RPMforge RPM Repository for RHEL 6 - dag
+### URL: http://rpmforge.net/
+[rpmforge]
 ----
+
