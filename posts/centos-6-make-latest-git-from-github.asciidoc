@@ -11,19 +11,18 @@ v1,27-May-2014
 
 == Prerequisites
 [source,sh,numbered]
-sudo yum install openssl-devel curl-devel expat-devel
+sudo yum install openssl-devel curl-devel expat-devel gettext-devel zlib-devel
 
 == Initial GIT Install
 [source,sh,numbered]
 sudo yum install git
-
 
 === Clone git from github
 [source,sh,numbered]
 git clone https://github.com/git/git.git 
 
 === Switch to version tag branch
-List available tags:
+List available version tags:
 [source,sh,numbered]
 cd git
 git tag
@@ -31,16 +30,15 @@ git tag
 === Pick a version and build it:
 [source,sh,numbered]
 git checkout v1.8.5.5
-make
+make prefix=/usr/lib/git all
+sudo make prefix=/usr/lib/git install
 
 == Configure
+
 [source,sh,numbered]
-git --version
-git version 1.7.1
-sudo mv /usr/bin/git /usr/bin/git_1710
-sudo mv ./git /usr/bin/git_1855
-sudo alternatives --install /usr/bin/git git /usr/bin/git/git_1710 1710
-sudo alternatives --install /usr/bin/git git /usr/bin/git/git_1855 1855
+sudo rm /usr/bin/git
+sudo alternatives --install /usr/bin/git git /usr/libexec/git-core/git 1710
+sudo alternatives --install /usr/bin/git git /usr/lib/git/bin/git 1855
 
 == Test
 [source,sh,numbered]
