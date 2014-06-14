@@ -30,15 +30,15 @@ git tag
 === Pick a version and build it:
 [source,sh,numbered]
 git checkout v1.8.5.5
-make prefix=/usr/lib/git all
-sudo make prefix=/usr/lib/git install
+make prefix=/usr/lib/git_1855 all
+sudo make prefix=/usr/lib/git_1855 install
 
 == Configure
 
 [source,sh,numbered]
 sudo rm /usr/bin/git
 sudo alternatives --install /usr/bin/git git /usr/libexec/git-core/git 1710
-sudo alternatives --install /usr/bin/git git /usr/lib/git/bin/git 1855
+sudo alternatives --install /usr/bin/git git /usr/lib/git_1855/bin/git 1855
 
 == Test
 [source,sh,numbered]
