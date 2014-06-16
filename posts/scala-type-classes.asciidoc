@@ -1,0 +1,212 @@
+Scala: Type-classes
+===================
+Lance Gatlin <lance.gatlin@gmail.com>
+v1,12-Jun-2014
+:blogpost-status: unpublished
+:blogpost-categories: scala
+
+== Versions
+1. Scala 2.11.0
+
+== What is a type-class?
+
+A 'type-class' a type that is used to add new behaviors to other types, without having to extend or modify the other type. A type-class accepts one primary type parameter (and occasionally more type parameters) and defines one or more abstract methods that add new behaviors to the primary type. 
+
+.Example
+[source,scala,numbered]
+----
+trait Printable[A] { // <1>
+  def print(a: A) : String // <2>
+}
+----
+1. +Printable+ accepts one primary type parameter +A+
+2. +Printable+ adds a new print method to +A+
+
+A type is added as a member of a +type-class+ by implementing the type-class for that type:
+[source,scala,numbered]
+----
+implicit object PrintableInt extends Printable[Int] {
+  def print(i: Int) = "Int -> " + i.toString
+}
+...
+scala> implicitly[Printable[Int]].print(1)
+res0: String = Int -> 1
+----
+
+In Scala, some "semantic sugar" can be used to make using the +type-class+ easier:
+[source,scala,numbered]
+----
+implicit class PrintableSugar[A](val self: A) extends AnyVal {
+  def print(implicit printable:Printable[A]) = printable.print(self)
+}
+....
+scala> 1.print
+res1: String = Int -> 1
+----
+
+So what happens if we invoke print on a type that doesn't belong to the +Printable+ type-class?
+[source,scala,numbered]
+----
+scala> val gigawatts = 1.21
+gigawatts: Double = 1.21
+
+scala> gigawatts.print
+<console>:12: error: could not find implicit value for parameter printable: Printable[Double]
+              gigawatts.print
+
+scala>
+----
+
+Compiler error! Scala code that doesn't properly implement a type-class will never compile.
+
+== Why use type-classes?
+
+Type-classes are used to create "ad hoc" polymorphism. They allow adding types as members of a type-class at any time, including after the original definition of the type. Object Oriented Design (OOD) uses inheritance to create polymorphism, but this requires knowing all possible desired instances of polymorphism at design time (though the Visitor Pattern can be used to alleviate this problem somewhat).
+
+Type-classes are also highly modular. Users that aren't interested in adding the new behavior can simply ignore the type-class. This can significantly reduce the complexity of the primary type. Often when using type-classes and case classes in Scala, the case class doesn't need methods at all! Also, users of type-class libraries can select specific implementations of a type-class for the primary type that best suits their specific needs at that moment. In Scala, this is controlled by importing the desired type-class implementation:
+
+[source,scala,numbered]
+----
+trait Printable[A] { 
+  def print(a: A) : String 
+}
+object PrintableImplicits {
+  implicit object PrintableInt extends Printable[Int] { // <1>
+    def print(i: Int) = "Int -> " + i.toString
+  }
+}
+implicit class PrintableSugar[A](val self: A) extends AnyVal {
+  def print(implicit printable:Printable[A]) = printable.print(self)
+}
+object Example {
+  def foo {
+    import PrintableImplicits._
+    println(1.print)
+  }
+  def bar {
+    implicit val myPrintableInt = new Printable[Int] { // <2>
+      def print(i: Int) = "%03d" format i
+    }
+    println(1.print)
+  }
+}
+scala> Example.foo
+Int -> 1
+scala> Example.bar
+001
+----
+1. A wrapper object is used here to allow for better control of where the implicit is imported
+2. Defining a custom Printable for +Int+
+
+NOTE: If you pasted the previous examples into the console, you will need to restart the console to remove the global implicit for Printable[Int].
+
+== An Extended Example
+
+When I first read about type-classes, I found it difficult to understand what marginal value they added over classic OOD polymorphism. But overtime, I've grown to love type-classes. For me it took encountering the many painful refactorings that ultimately result from overuse of classic OOD polymorphism. Refactoring gets old quickly. I've built this example to help illustrate this idea.
+
+Once upon a time, I created a very basic inheritance structure for modeling the tools in my shed: 
+
+[source,scala,numbered]
+----
+trait Part
+trait Screw extends Part
+trait Tool
+class Hammer extends Tool {
+  def pound(something: Any) : Unit = ???
+}
+class Screwdriver extends Tool {
+  def turn(screw: Screw) : Unit = ???
+}
+class Rake extends Tool {
+  def gather(something: Any) : Unit = ???
+}
+----
+
+This classic OOD model suited my needs and got the job done for a long, long time. 
+
+But one day I realize I can't find my hammer. I'm working on my new IKEA shelf and I just have some finishing nails that I need to hammer in to finish. I poke around my shed and realize my favorite screwdriver ("big bertha") could probably get the job done! I awkwardly pound my finishing nails in using bertha, but my post-IKEA-assembly-bliss is cut short. I have a problem: Screwdrivers can pound! I'm in a hurry to get my new shelf into my house, so I quickly refactor my model:
+
+[source,scala,numbered]
+----
+trait Tool {
+  def pound(something: Any) : Unit
+}
+class Hammer extends Tool {
+  def pound(something: Any) : Unit = ???
+}   
+class Screwdriver extends Tool {
+  def pound(something: Any) : Unit = ???
+  def turn(screw: Screw) : Unit = ???
+}
+class Rake extends Tool {
+  def pound(something: Any) : Unit = throw new UnsupportedOperationException
+  def gather(something: Any) : Unit = ???
+}
+----
+
+This is far from ideal, but I'm in a hurry, so I commit my code and call it a day. Later that night, I'm restless in bed. I realize that if I were to loan my tools to a neighbor, he might assume that because my tool model has the pound method, he can pound things with any of my tools. This might break my rake but I made sure he can't do that. But my model shouldn't give him that idea at all. The next morning, I refactor again:
+
+[source,scala,numbered]
+----
+trait Tool
+class ToolThatPounds extends Tool {
+  def pound(something: Any) : Unit = ???
+}
+class Hammer extends ToolThatPounds {
+  def pound(something: Any) : Unit = ???
+}   
+class Screwdriver extends ToolThatPounds {
+  def pound(something: Any) : Unit = ???
+  def turn(screw: Screw) : Unit = ???
+}
+class Rake extends Tool {
+  def gather(something: Any) : Unit = ???
+}
+----
+
+Much better! My neighbor will no longer assume he can use my rake to pound things. Though I've created a class that doesn't really represent anything real. Also, the more I think about the stuff in my shed, the more I realize there is a ton of stuff in there that could pound things. I could have used some my spare piping to pound things as well! If I want to represent this I will have to refactor again! 
+
+Luckily, I spend some time searching the web and discover the pattern to end all this nasty refactoring: type-classes. I refactor one final time:
+
+[source,scala,numbered]
+----
+trait Part
+trait Screw extends Part
+trait Piping extends Part
+trait Tool
+class Hammer extends Tool 
+class Screwdriver extends Tool 
+class Rake extends Tool 
+
+trait Pound[A] {
+  def pound(a: A, something: Any) : Unit
+}
+trait TurnScrew[A] {
+  def turn(a: A, screw: Screw) : Unit
+}
+trait Gather[A] {
+  def gather(a: A, something: Any) : Unit
+}
+
+implicit val PoundWithHammer : Pound[Hammer] = ???
+implicit val PoundWithScrewdriver : Pound[Screwdriver] = ???
+implicit val PoundWithPiping : Pound[Piping] = ???
+implicit val TurnScrewWithScrewdriver : TurnScrew[Screwdriver] = ???
+implicit val GatherWithRake : Gather[Rake] = ???
+----
+
+Perfection! No refactoring needed ever again. As I find things around my shed that can pound, I simply add a new type-class implementation. Also, I can do the same for things that could turn screws or gather leaves. Super flexible!
+
+== When to use OOD polymorphism
+
+Some folks might want you to think that you should always use type-classes. But in Scala they require significantly more boilerplate to implement. Also, because Scala doesn't natively support type-classes, code readers must know the Scala type-class pattern to understand how they work.
+
+I've found that the best time to use OOD polymorphism is when all of the possible polymorphic methods are known up front and expansion to future use cases is unlikely. A great example of this is the Scala collections library. It is very unlikely that a new method will be added to IndexedSeq or that Traversable will suddenly need the ability to get a value by its index. On the flip side, implementing the collections library with type-classes would introduce a ton of complexity. Each method on Traversable would need its own type-class. That's at least 50 type-classes for 50 methods! (Though this number could be reduced significantly by grouping related methods into a few type-classes. See StringOps and StringLike for examples.)
+
+== When to use type-classes
+
+For type-classes, I've found that the best time to use them is when I might 
+need to add a behavior to potentially any type. The best example of that is for serialization/marshalling/binding. Converting to and from JSON, BSON, XML, etc is something that could be needed for almost any type. Also, sometimes I like to swap out implementations based on what I'm doing. I might have different JSON needs depending on the receiptent of the JSON.
+
+In many cases, the choice can be somewhat arbitrary. Scala gives me a ton of flexibility and the downside of all of that choice is that many times it is simply a question of what color to paint my shed.
+
