@@ -10,7 +10,7 @@ v1,12-Jun-2014
 
 == What is a type-class?
 
-A 'type-class' a type that is used to add new behaviors to other types, without having to extend or modify the other type. A type-class accepts one primary type parameter (and occasionally more type parameters) and defines one or more abstract methods that add new behaviors to the primary type. 
+A 'type-class' a type that is used to add new behaviors to a "primary" type, without having to extend or modify the primary type<<sources,^1^>>. In Scala, there is no native support for type-classes. Instead type-classes are implemented by following a design pattern<<sources,^2^>>. The most common design pattern is to create a Trait for the type-class that accepts one type parameter as the primary type (though more are supported<<sources,^6^>>) and to define one or more abstract methods that add new behaviors to the primary type. 
 
 .Example
 [source,scala,numbered]
@@ -33,7 +33,7 @@ scala> implicitly[Printable[Int]].print(1)
 res0: String = Int -> 1
 ----
 
-NOTE: Simple type-class implementations can often be automatically created using macros or implicits
+NOTE: Simple type-class implementations can often be automatically created using macros or implicits.
 
 In Scala, some "semantic sugar" can be used to make using type-classes easier:
 [source,scala,numbered]
@@ -203,12 +203,21 @@ Perfection! No refactoring needed ever again. As I find things around my shed th
 
 Some folks might want you to think that you should always use type-classes. But in Scala they require significantly more boilerplate to implement. Also, because Scala doesn't natively support type-classes, code readers must know the Scala type-class pattern to understand how they work.
 
-I've found that the best time to use OOD polymorphism is when all of the possible polymorphic methods are known up front and expansion to future use cases is unlikely. A great example of this is the Scala collections library. It is very unlikely that a new method will be added to IndexedSeq or that Traversable will suddenly need the ability to get a value by its index. On the flip side, implementing the collections library with type-classes would introduce a ton of complexity. Each method on Traversable would need its own type-class. That's at least 50 type-classes for 50 methods! (Though this number could be reduced significantly by grouping related methods into a few type-classes. See StringOps and StringLike for examples.)
+I've found that the best time to use OOD polymorphism over type-classes is when all of the possible polymorphic methods are known up front and expansion to future use cases is unlikely. A great example of this is the Scala collections library. It is very unlikely that a new method will be added to IndexedSeq or that Traversable will suddenly need the ability to get a value by its index. On the flip side, implementing the collections library with only type-classes would introduce a ton of complexity. Each method on Traversable would need its own type-class. That's at least 50 type-classes for 50 methods! (Though this number could be reduced significantly by grouping related methods into a few type-classes. See StringOps and StringLike for examples.)
 
 == When to use type-classes
 
-For type-classes, I've found that the best time to use them is when I might 
-need to add a behavior to potentially any type. The best example of that is for serialization/marshalling/binding etc. Converting to and from JSON, BSON, XML, etc is something that could be needed for almost any type. Also, sometimes I like to swap out implementations based on what I'm doing. I might have different JSON needs depending on the recipient of the JSON.
+In choosing to use type-classes, I've found that the clearest use case for them is when I might 
+need to add a behavior to almost any type. The best example of this is for serialization/marshalling/binding etc. Converting to and from JSON, BSON, XML, etc is something that is commonly needed for most every type. Also, sometimes I like to swap out implementations based on what I'm doing. I might have a different JSON serializer depending on the recipient of the JSON.
 
-In many cases, the choice can be somewhat arbitrary. Scala gives me a ton of flexibility and the downside of all of that choice is that many times it is simply a question of what color to paint my shed.
+In many cases, the choice of OOD inheritance or type-classes to achieve polymorphism can be somewhat arbitrary. Scala gives me a ton of flexibility and the downside of all of that choice is that many times, at least within the context of Scala, the question is simply one of what color to paint my shed.
 
+[[sources]]
+== Sources
+1. http://en.wikipedia.org/wiki/Type_class
+2. http://ropas.snu.ac.kr/~bruno/papers/TypeClasses.pdf
+3. http://danielwestheide.com/blog/2013/02/06/the-neophytes-guide-to-scala-part-12-type-classes.html
+4. http://debasishg.blogspot.com/2010/06/scala-implicits-type-classes-here-i.html
+5. http://stackoverflow.com/questions/4465948/what-are-scala-context-and-view-bounds
+6. http://blog.evilmonkeylabs.com/2012/06/11/Understanding_Scala_Type_Classes/
+7. http://www.casualmiracles.com/2012/05/03/a-small-example-of-the-typeclass-pattern-in-scala/
