@@ -22,7 +22,7 @@ trait Printable[A] { // <1>
 1. +Printable+ accepts one primary type parameter +A+
 2. +Printable+ adds a new print method to +A+
 
-A type is added as a member of a +type-class+ by implementing the type-class for that type:
+A type is added as a member of a type-class by implementing the type-class for that type:
 [source,scala,numbered]
 ----
 implicit object PrintableInt extends Printable[Int] {
@@ -32,6 +32,8 @@ implicit object PrintableInt extends Printable[Int] {
 scala> implicitly[Printable[Int]].print(1)
 res0: String = Int -> 1
 ----
+
+NOTE: Simple type-class implementations can often be automatically created using macros or implicits
 
 In Scala, some "semantic sugar" can be used to make using type-classes easier:
 [source,scala,numbered]
@@ -61,7 +63,7 @@ Compiler error! Scala code that doesn't properly implement a type-class will nev
 
 == Why use type-classes?
 
-Type-classes are used to create "ad hoc" polymorphism. They allow adding types as members of a type-class at any time, including after the original definition of the type. Object Oriented Design (OOD) uses inheritance to create polymorphism, but this requires knowing all possible desired instances of polymorphism at design time (though the Visitor Pattern can be used to alleviate this problem somewhat).
+Type-classes are used to create "ad hoc" polymorphism. They allow adding types as members of a type-class at any time, including after the original definition of the type. Object Oriented Design (OOD) uses inheritance to create polymorphism, but this requires knowing all possible desired instances of polymorphism at design time (though the Visitor Pattern can be used to alleviate this problem somewhat). If further polymorphism is required, most likely many types will need to be refactored.
 
 Type-classes are also highly modular. Users that aren't interested in adding the new behavior can simply ignore the type-class. This can significantly reduce the complexity of the primary type. Often when using type-classes and case classes in Scala, the case class doesn't need methods at all! Also, users of type-class libraries can select specific implementations of a type-class for the primary type that best suits their specific needs at that moment. In Scala, this is controlled by importing the desired type-class implementation:
 
