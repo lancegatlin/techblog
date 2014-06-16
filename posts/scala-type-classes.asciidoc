@@ -33,7 +33,7 @@ scala> implicitly[Printable[Int]].print(1)
 res0: String = Int -> 1
 ----
 
-In Scala, some "semantic sugar" can be used to make using the +type-class+ easier:
+In Scala, some "semantic sugar" can be used to make using type-classes easier:
 [source,scala,numbered]
 ----
 implicit class PrintableSugar[A](val self: A) extends AnyVal {
@@ -164,7 +164,7 @@ class Rake extends Tool {
 }
 ----
 
-Much better! My neighbor will no longer assume he can use my rake to pound things. Though I've created a class that doesn't really represent anything real. Also, the more I think about the stuff in my shed, the more I realize there is a ton of stuff in there that could pound things. I could have used some my spare piping to pound things as well! If I want to represent this I will have to refactor again! 
+Much better! My neighbor will no longer assume he can use my rake to pound things. Though I've created a class that doesn't really represent anything real. Also, the more I think about the stuff in my shed, the more I realize there is a ton of stuff in there that could pound things. I could have used some of my spare piping to pound things as well! If I want to represent this I will have to refactor again! 
 
 Luckily, I spend some time searching the web and discover the pattern to end all this nasty refactoring: type-classes. I refactor one final time:
 
@@ -206,7 +206,7 @@ I've found that the best time to use OOD polymorphism is when all of the possibl
 == When to use type-classes
 
 For type-classes, I've found that the best time to use them is when I might 
-need to add a behavior to potentially any type. The best example of that is for serialization/marshalling/binding. Converting to and from JSON, BSON, XML, etc is something that could be needed for almost any type. Also, sometimes I like to swap out implementations based on what I'm doing. I might have different JSON needs depending on the receiptent of the JSON.
+need to add a behavior to potentially any type. The best example of that is for serialization/marshalling/binding etc. Converting to and from JSON, BSON, XML, etc is something that could be needed for almost any type. Also, sometimes I like to swap out implementations based on what I'm doing. I might have different JSON needs depending on the recipient of the JSON.
 
 In many cases, the choice can be somewhat arbitrary. Scala gives me a ton of flexibility and the downside of all of that choice is that many times it is simply a question of what color to paint my shed.
 
