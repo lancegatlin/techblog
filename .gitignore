@@ -1,5 +1,8 @@
 **/*~
 
+# Ignore compiled python
+*.pyc
+
 # Ignore IntelliJ project files and dirs
 *.iml
 .idea_modules/

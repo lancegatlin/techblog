@@ -64,6 +64,7 @@ fs.inotify.max_user_watches = 524288
 ----
 +
 Apply the change without reboot:
++
 ----
 sudo sysctl -p
 ----
